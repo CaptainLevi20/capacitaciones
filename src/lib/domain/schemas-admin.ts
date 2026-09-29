@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ErrorNegocio } from '@/lib/errores';
+import { desdeInputLocal } from './fechas';
 
 export function validar<T extends z.ZodTypeAny>(schema: T, valores: unknown): z.infer<T> {
   const r = schema.safeParse(valores);
@@ -58,3 +59,36 @@ export const habeasSchema = z.object({
 export const marcasEventoSchema = z.array(
   z.object({ marcaId: z.string().uuid(), orden: z.number().int().min(0), visible: z.boolean() }),
 );
+
+const fechaLocal = (etiqueta: string) =>
+  z.string().transform((v, ctx) => {
+    const d = desdeInputLocal(v);
+    if (!d) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `${etiqueta} no válida` });
+      return z.NEVER;
+    }
+    return d;
+  });
+
+const minutos = z.coerce
+  .number({ invalid_type_error: 'Minutos no válidos' })
+  .int('Minutos no válidos')
+  .min(0, 'Minutos no válidos')
+  .max(1440, 'Minutos no válidos');
+
+export const sesionSchema = z
+  .object({
+    numero: z.coerce.number({ invalid_type_error: 'Número no válido' }).int('Número no válido').min(1, 'Número no válido'),
+    titulo: opcional(200),
+    lugar: opcional(200),
+    inicio: fechaLocal('Fecha de inicio'),
+    fin: fechaLocal('Fecha de fin'),
+    modo_apertura: z.enum(['manual', 'automatico'], { errorMap: () => ({ message: 'Modo de apertura no válido' }) }),
+    abre_min_antes: minutos,
+    cierra_min_despues: minutos,
+  })
+  .refine((d) => d.fin > d.inicio, { message: 'La hora de fin debe ser posterior a la de inicio', path: ['fin'] });
+export type DatosSesion = z.infer<typeof sesionSchema>;
+export const CAMPOS_SESION = [
+  'numero', 'titulo', 'lugar', 'inicio', 'fin', 'modo_apertura', 'abre_min_antes', 'cierra_min_despues',
+];

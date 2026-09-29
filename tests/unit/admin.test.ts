@@ -75,3 +75,29 @@ describe('puedeActivarse', () => {
     expect(puedeActivarse('Autorizo a Avance Jurídico...')).toBeNull();
   });
 });
+
+import { sesionSchema } from '@/lib/domain/schemas-admin';
+
+describe('sesionSchema', () => {
+  const base = {
+    numero: '3',
+    titulo: '',
+    lugar: 'Auditorio',
+    inicio: '2026-10-14T08:00',
+    fin: '2026-10-14T12:00',
+    modo_apertura: 'automatico',
+    abre_min_antes: '30',
+    cierra_min_despues: '120',
+  };
+  it('interpreta las horas en Bogotá', () => {
+    const d = validar(sesionSchema, base);
+    expect(d.numero).toBe(3);
+    expect(d.titulo).toBeNull();
+    expect(d.inicio.toISOString()).toBe('2026-10-14T13:00:00.000Z');
+  });
+  it('rechaza fin anterior al inicio', () => {
+    expect(() => validar(sesionSchema, { ...base, fin: '2026-10-14T07:00' })).toThrow(
+      'La hora de fin debe ser posterior a la de inicio',
+    );
+  });
+});
