@@ -45,3 +45,18 @@ test('edita una sesión', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar sesión' }).click();
   await expect(page.getByText('Sesión guardada')).toBeVisible();
 });
+
+test('descarga el QR y muestra la hoja imprimible', async ({ page }) => {
+  const ev = await crearEventoPrueba(clienteServicioPrueba());
+  await iniciarSesionAdmin(page);
+  await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
+  const fila = page.getByRole('row', { name: /Sesión de prueba/ });
+  const descarga = page.waitForEvent('download');
+  await fila.getByRole('link', { name: 'QR entrada' }).click();
+  expect((await descarga).suggestedFilename()).toBe('sesion-1-entrada.png');
+  await fila.getByRole('link', { name: 'Hoja imprimible' }).click();
+  await expect(page.getByText('ENTRADA', { exact: true })).toBeVisible();
+  await expect(page.getByText('SALIDA', { exact: true })).toBeVisible();
+  await expect(page.getByText(`/r/${ev.tokenEntrada}`)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Imprimir / Guardar como PDF' })).toBeVisible();
+});

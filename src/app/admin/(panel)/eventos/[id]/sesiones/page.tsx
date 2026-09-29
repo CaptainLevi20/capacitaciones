@@ -90,6 +90,15 @@ export default async function PaginaSesiones({ params }: { params: Promise<{ id:
                         <Link href={`/admin/eventos/${id}/sesiones/${s.id}`} className={claseBoton.secundario}>
                           Editar
                         </Link>
+                        <a href={`/api/admin/sesiones/${s.id}/qr/entrada`} className={claseBoton.secundario}>
+                          QR entrada
+                        </a>
+                        <a href={`/api/admin/sesiones/${s.id}/qr/salida`} className={claseBoton.secundario}>
+                          QR salida
+                        </a>
+                        <Link href={`/admin/imprimir/${s.id}`} className={claseBoton.secundario}>
+                          Hoja imprimible
+                        </Link>
                         <FormularioAccion
                           accion={regenerarTokensAccion.bind(null, id, s.id)}
                           textoBoton="Regenerar QR"
