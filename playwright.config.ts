@@ -13,5 +13,12 @@ export default defineConfig({
     { name: 'movil', testMatch: /publico-.*\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     { name: 'escritorio', testMatch: /admin-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'] } },
   ],
-  webServer: { command: 'npm run dev', url: 'http://localhost:3000/r/salud', reuseExistingServer: true, timeout: 180_000 },
+  // RATE_LIMIT_MAX bajo para que las E2E detecten consumos de más del límite por persona.
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000/r/salud',
+    reuseExistingServer: false,
+    timeout: 180_000,
+    env: { RATE_LIMIT_MAX: '3' },
+  },
 });

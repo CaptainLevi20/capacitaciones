@@ -12,7 +12,7 @@ import {
   type DatosPersonales,
 } from '@/lib/domain/schemas';
 import { separarRespuestas } from '@/lib/domain/encuesta';
-import type { ResultadoEnvio } from '@/lib/envio';
+import { MENSAJE_HABEAS_CAMBIO, type ResultadoEnvio } from '@/lib/envio';
 
 export type ResultadoConsulta =
   | {
@@ -26,17 +26,18 @@ export type ResultadoConsulta =
 const NO_DISPONIBLE = 'El registro de salida para esta sesión no está disponible.';
 const DEMASIADOS = 'Demasiados intentos. Espere unos minutos e intente de nuevo.';
 
-async function prepararSolicitud(token: string) {
+// Cada paso tiene su propia clave: una persona consume a lo sumo un envío por paso.
+async function prepararSolicitud(token: string, paso: 'consulta' | 'envio') {
   const db = clienteServicio();
   const res = await obtenerSesionPorToken(db, token, 'salida');
   if (res.tipo !== 'abierta') return { error: NO_DISPONIBLE } as const;
   const meta = await metaSolicitud();
-  if (!(await consumirRateLimit(db, `salida:${token}:${meta.ip ?? 'sin-ip'}`))) return { error: DEMASIADOS } as const;
+  if (!(await consumirRateLimit(db, `salida-${paso}:${token}:${meta.ip ?? 'sin-ip'}`))) return { error: DEMASIADOS } as const;
   return { db, sesion: res.sesion, meta } as const;
 }
 
 export async function consultarDocumento(token: string, fd: FormData): Promise<ResultadoConsulta> {
-  const s = await prepararSolicitud(token);
+  const s = await prepararSolicitud(token, 'consulta');
   if ('error' in s) return { ok: false, errores: {}, mensaje: s.error };
   const p = documentoSchema.safeParse(Object.fromEntries(fd));
   if (!p.success) return { ok: false, errores: erroresPorCampo(p.error) };
@@ -46,7 +47,7 @@ export async function consultarDocumento(token: string, fd: FormData): Promise<R
 
 export async function enviarSalida(token: string, fd: FormData): Promise<ResultadoEnvio> {
   if (fd.get('sitio_web')) return { ok: true, nombres: '' };
-  const s = await prepararSolicitud(token);
+  const s = await prepararSolicitud(token, 'envio');
   if ('error' in s) return { ok: false, errores: {}, mensaje: s.error };
   const valores = Object.fromEntries(fd);
   const doc = documentoSchema.safeParse(valores);
@@ -56,6 +57,9 @@ export async function enviarSalida(token: string, fd: FormData): Promise<Resulta
   const errores: Record<string, string> = {};
   let personales: DatosPersonales | null = null;
   if (!entrada) {
+    if (valores.habeas_version_id !== s.sesion.habeas.id) {
+      return { ok: false, errores: {}, mensaje: MENSAJE_HABEAS_CAMBIO };
+    }
     const p = entradaSchema.safeParse(valores);
     if (p.success) personales = p.data;
     else Object.assign(errores, erroresPorCampo(p.error));

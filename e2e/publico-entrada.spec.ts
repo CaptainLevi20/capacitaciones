@@ -108,3 +108,15 @@ test('muestra avisos para sesión cerrada y enlace inválido', async ({ page }) 
   await page.goto('/r/token-que-no-existe-000000');
   await expect(page.getByRole('heading', { name: 'Enlace no válido' })).toBeVisible();
 });
+
+test('si cambia la autorización de datos mientras se diligencia, pide recargar y no registra', async ({ page }) => {
+  const db = clienteServicioPrueba();
+  const ev = await crearEventoPrueba(db);
+  await page.goto(`/r/${ev.tokenEntrada}`);
+  await llenarEntrada(page);
+  await casillaHabeas(page).check();
+  await db.from('evento_habeas_versiones').insert({ evento_id: ev.eventoId, version: 2, texto: 'Texto nuevo de autorización.' });
+  await botonRegistrar(page).click();
+  await expect(page.getByText(/La autorización de tratamiento de datos cambió/)).toBeVisible();
+  expect(await contarEntradas(ev.sesionId)).toBe(0);
+});

@@ -35,3 +35,24 @@ describe('listarConsolidado', () => {
     expect(await listarConsolidado(db, { eventoId: ev.eventoId })).toHaveLength(1005);
   });
 });
+
+describe('listarConsolidado con límite del servidor menor que la página', () => {
+  it('no se detiene antes de tiempo si el servidor devuelve menos filas que las pedidas', async () => {
+    const ev = await crearEventoPrueba(db);
+    const personas = Array.from({ length: 1005 }, (_, i) => ({ ...datosPersona(`E${String(i).padStart(6, '0')}`) }));
+    const { data: asistentes, error } = await db.from('asistentes').insert(personas).select('id');
+    if (error) throw error;
+    const ahora = new Date().toISOString();
+    const { error: e2 } = await db.from('entradas').insert(
+      asistentes.map((a) => ({
+        sesion_id: ev.sesionId, asistente_id: a.id, nombres: 'Ana', apellidos: 'Pérez', correo: 'a@x.co',
+        dependencia: 'D', cargo: 'C', habeas_version_id: ev.habeasId, consentimiento_at: ahora,
+      })),
+    );
+    if (e2) throw e2;
+    // Página de 2000 > max_rows (1000): el servidor recorta la respuesta.
+    const filas = await listarConsolidado(db, { eventoId: ev.eventoId }, 2000);
+    expect(filas).toHaveLength(1005);
+    expect(new Set(filas.map((f) => f.asistente_id)).size).toBe(1005);
+  });
+});

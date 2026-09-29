@@ -41,7 +41,11 @@ export function sanitizarBusqueda(q: string): string {
 
 const PAGINA = 1000; // máximo de filas por respuesta de PostgREST en Supabase
 
-export async function listarConsolidado(db: Db, f: FiltroConsolidado): Promise<FilaConsolidada[]> {
+export async function listarConsolidado(
+  db: Db,
+  f: FiltroConsolidado,
+  pagina: number = PAGINA,
+): Promise<FilaConsolidada[]> {
   const busqueda = f.busqueda ? sanitizarBusqueda(f.busqueda) : '';
   const construir = () => {
     let q = db.from('asistencia_consolidada').select('*').eq('evento_id', f.eventoId);
@@ -53,16 +57,19 @@ export async function listarConsolidado(db: Db, f: FiltroConsolidado): Promise<F
     return q.order('sesion_numero').order('apellidos').order('asistente_id');
   };
   const filas: FilaConsolidada[] = [];
-  for (let desde = 0; ; desde += PAGINA) {
-    const { data, error } = await construir().range(desde, desde + PAGINA - 1);
+  // Avanza por lo realmente recibido y para solo con una página vacía: el servidor
+  // puede recortar cada respuesta a menos filas de las pedidas (max_rows).
+  for (;;) {
+    const desde = filas.length;
+    const { data, error } = await construir().range(desde, desde + pagina - 1);
     if (error) throw error;
+    if (!data.length) break;
     filas.push(
       ...(data as FilaConsolidada[]).map((r) => ({
         ...r,
         promedio_escala: r.promedio_escala === null ? null : Number(r.promedio_escala),
       })),
     );
-    if (data.length < PAGINA) break;
   }
   return filas;
 }

@@ -14,7 +14,7 @@ export function FormularioEntrada({
   dominioCorreo,
 }: {
   accion: (fd: FormData) => Promise<ResultadoEnvio>;
-  habeas: { texto: string; urlPolitica: string | null };
+  habeas: { id: string; texto: string; urlPolitica: string | null };
   dominioCorreo: string | null;
 }) {
   const { onSubmit, pendiente, resultado, errorRed } = useEnvio(accion);

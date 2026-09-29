@@ -2,7 +2,7 @@ export function CajaHabeas({
   habeas,
   error,
 }: {
-  habeas: { texto: string; urlPolitica: string | null };
+  habeas: { id: string; texto: string; urlPolitica: string | null };
   error?: string;
 }) {
   return (
@@ -27,6 +27,7 @@ export function CajaHabeas({
           Consultar la política de tratamiento de datos
         </a>
       )}
+      <input type="hidden" name="habeas_version_id" value={habeas.id} />
       <label className="mt-3 flex min-h-11 items-start gap-3">
         <input type="checkbox" name="acepta_habeas" required className="mt-1 h-5 w-5 shrink-0" />
         <span className="text-sm text-slate-900">

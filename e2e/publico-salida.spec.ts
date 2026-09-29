@@ -87,3 +87,39 @@ test('el servidor exige las preguntas de la encuesta', async ({ page }) => {
     { estado_asistencia: 'solo_entrada', promedio_escala: null, nps: null, comentario: null },
   ]);
 });
+
+test('varias personas salen desde la misma red sin quedar bloqueadas', async ({ page }) => {
+  // El servidor E2E corre con RATE_LIMIT_MAX=3: cada persona debe gastar como máximo 1 envío por paso.
+  const db = clienteServicioPrueba();
+  const ev = await crearEventoPrueba(db);
+  const s = { id: ev.sesionId, habeasId: ev.habeasId };
+  await registrarEntrada(db, s, datosPersona('111111'), sinMeta);
+  await registrarEntrada(db, s, datosPersona('222222'), sinMeta);
+  for (const doc of ['111111', '222222']) {
+    await page.goto(`/s/${ev.tokenSalida}`);
+    await ingresarDocumento(page, doc);
+    await expect(page.getByText('Hola, Ana María')).toBeVisible();
+    await responderEncuesta(page);
+    await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
+    await expect(page.getByText('¡Gracias!')).toBeVisible();
+  }
+});
+
+test('si cambia la autorización de datos mientras se diligencia, pide recargar y no registra', async ({ page }) => {
+  const db = clienteServicioPrueba();
+  const ev = await crearEventoPrueba(db);
+  await page.goto(`/s/${ev.tokenSalida}`);
+  await ingresarDocumento(page, '52123456');
+  await expect(page.getByText('No encontramos su registro de entrada')).toBeVisible();
+  await page.getByLabel('Nombres').fill('Luis');
+  await page.getByLabel('Apellidos').fill('Rojas');
+  await page.getByLabel('Correo institucional').fill('lrojas@procuraduria.gov.co');
+  await page.getByLabel('Dependencia').fill('Secretaría General');
+  await page.getByLabel('Cargo').fill('Técnico');
+  await page.getByLabel(/He leído y autorizo/).check();
+  await responderEncuesta(page);
+  await db.from('evento_habeas_versiones').insert({ evento_id: ev.eventoId, version: 2, texto: 'Texto nuevo de autorización.' });
+  await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
+  await expect(page.getByText(/La autorización de tratamiento de datos cambió/)).toBeVisible();
+  expect(await consolidado(ev.sesionId)).toEqual([]);
+});

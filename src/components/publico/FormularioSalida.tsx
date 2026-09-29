@@ -22,7 +22,7 @@ export function FormularioSalida({
 }: {
   consultar: (fd: FormData) => Promise<ResultadoConsulta>;
   enviar: (fd: FormData) => Promise<ResultadoEnvio>;
-  habeas: { texto: string; urlPolitica: string | null };
+  habeas: { id: string; texto: string; urlPolitica: string | null };
   dominioCorreo: string | null;
   preguntas: Pregunta[];
 }) {
