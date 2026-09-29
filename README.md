@@ -1,36 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de registro de capacitaciones — Avance Jurídico
 
-## Getting Started
+Registro de entrada y salida (con evaluación) por QR, con co-branding configurable.
 
-First, run the development server:
+## Operación
+1. **Marcas**: suba los logos (PNG, SVG o JPG, máx. 1 MB).
+2. **Configuración**: texto de Habeas Data por defecto para eventos nuevos.
+3. **Eventos → Nuevo evento**: datos, co-branding, Habeas Data (cláusula oficial) y encuesta. Actívelo.
+4. **Sesiones**: pegue las filas (número; fecha; hora inicio; hora fin; título; lugar). Por defecto abren 30 min antes y cierran 2 h después; también puede abrirlas o cerrarlas a mano.
+5. **Hoja imprimible**: imprima o guarde como PDF los QR de cada sesión. Si regenera los QR, vuelva a imprimirlos.
+6. **Datos**: resumen, registros y exportación a Excel (una hoja por sesión).
+7. Para otra capacitación: **Duplicar evento** y cambiar logos, textos y sesiones.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Desarrollo
+- Requisitos: Node 24, Docker.
+- `npm install && npm run db:start && npm run db:reset && npm run env:local && npm run dev`
+- Pruebas: `npm test` (unitarias), `npm run test:int` (Supabase local), `npm run e2e` (Playwright). No ejecute `test:int` y `e2e` al mismo tiempo.
+- Administrador local: `node scripts/crear-admin.mjs correo@ejemplo.co "contraseña-larga"`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Despliegue
+Vercel (push a `main`) + Supabase (`npx supabase db push` para las migraciones).
+Variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_BASE_URL`.
+**Defina el dominio definitivo antes de imprimir QR**: la URL queda dentro del código.
