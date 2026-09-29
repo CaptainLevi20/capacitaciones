@@ -235,3 +235,12 @@ Certificados de asistencia, envío de correos a asistentes, roles múltiples, ti
 3. Cuentas de GitHub, Vercel y Supabase, o acceso a ellas.
 4. Decisión sobre el dominio definitivo.
 5. Fechas y horas de las 12 sesiones de la PGN.
+
+## 10. Ajustes decididos al planear (prevalecen sobre las secciones anteriores)
+
+1. **Rate limit:** 300 envíos por IP y token cada 10 min, no 20. Los asistentes de la PGN comparten la IP pública de la wifi institucional.
+2. **Hoja imprimible en HTML** con "Imprimir / Guardar como PDF", en lugar de un PDF generado en el servidor. Así se soportan logos SVG y no hace falta `@react-pdf/renderer`.
+3. **`marcas.logo_path` admite nulos.** Mientras una marca no tenga logo, el encabezado muestra su nombre.
+4. **Tablas nuevas `configuracion` y `plantilla_preguntas`,** más una página "Configuración" para el texto de Habeas Data por defecto. Los datos base se cargan en una migración para que también lleguen a producción.
+5. **Administradores:** se crean desde el dashboard o el SQL de Supabase, o con `scripts/crear-admin.mjs`. No hay invitación desde el panel.
+6. **Sin borrado** de eventos ni sesiones desde el panel. Los eventos se archivan.
