@@ -32,3 +32,46 @@ describe('marcaSchema', () => {
     );
   });
 });
+
+import { eventoSchema, habeasSchema } from '@/lib/domain/schemas-admin';
+import { puedeActivarse } from '@/lib/repo/eventos';
+
+describe('eventoSchema', () => {
+  it('normaliza dominio y convierte vacíos en null', () => {
+    expect(
+      validar(eventoSchema, {
+        nombre: ' Capacitación PGN 2026 ',
+        cliente: '',
+        capacitadores: 'Juanita, Julia',
+        dominio_correo: '@Procuraduria.gov.co',
+        color_primario: '',
+      }),
+    ).toEqual({
+      nombre: 'Capacitación PGN 2026',
+      cliente: null,
+      capacitadores: 'Juanita, Julia',
+      dominio_correo: 'procuraduria.gov.co',
+      color_primario: null,
+    });
+  });
+  it('rechaza un dominio inválido', () => {
+    expect(() =>
+      validar(eventoSchema, { nombre: 'Evento', cliente: '', capacitadores: '', dominio_correo: 'no es dominio', color_primario: '' }),
+    ).toThrow('Dominio no válido (ej. procuraduria.gov.co)');
+  });
+});
+
+describe('habeasSchema', () => {
+  it('exige un texto de al menos 20 caracteres y un enlace válido u omitido', () => {
+    expect(validar(habeasSchema, { texto: 'x'.repeat(20), url_politica: '' })).toEqual({ texto: 'x'.repeat(20), url_politica: null });
+    expect(() => validar(habeasSchema, { texto: 'corto', url_politica: '' })).toThrow('El texto de autorización es demasiado corto');
+    expect(() => validar(habeasSchema, { texto: 'x'.repeat(20), url_politica: 'no-url' })).toThrow('Enlace no válido');
+  });
+});
+
+describe('puedeActivarse', () => {
+  it('bloquea mientras el texto sea el provisional', () => {
+    expect(puedeActivarse('[PENDIENTE: cláusula oficial de Avance Jurídico]')).toMatch(/provisional/);
+    expect(puedeActivarse('Autorizo a Avance Jurídico...')).toBeNull();
+  });
+});

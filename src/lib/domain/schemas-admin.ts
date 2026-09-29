@@ -28,3 +28,33 @@ export const marcaSchema = z.object({
   activa: casillaSchema,
 });
 export type DatosMarca = z.infer<typeof marcaSchema>;
+
+export const eventoSchema = z.object({
+  nombre: z.string().trim().min(3, 'Ingrese el nombre del evento').max(150, 'Máximo 150 caracteres'),
+  cliente: opcional(150),
+  capacitadores: opcional(300),
+  dominio_correo: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .transform((v) => v.replace(/^@/, ''))
+    .pipe(z.string().regex(/^(([a-z0-9-]+\.)+[a-z]{2,})?$/, 'Dominio no válido (ej. procuraduria.gov.co)'))
+    .transform((v) => v || null),
+  color_primario: colorSchema,
+});
+export type DatosEvento = z.infer<typeof eventoSchema>;
+export const CAMPOS_EVENTO = ['nombre', 'cliente', 'capacitadores', 'dominio_correo', 'color_primario'];
+
+export const habeasSchema = z.object({
+  texto: z.string().trim().min(20, 'El texto de autorización es demasiado corto'),
+  url_politica: z
+    .string()
+    .trim()
+    .url('Enlace no válido')
+    .or(z.literal(''))
+    .transform((v) => v || null),
+});
+
+export const marcasEventoSchema = z.array(
+  z.object({ marcaId: z.string().uuid(), orden: z.number().int().min(0), visible: z.boolean() }),
+);
