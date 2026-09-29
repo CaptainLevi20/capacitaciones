@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --project unit",
-    "test:int": "vitest run --project integration",
+    "test:int": "vitest run --project integration --no-file-parallelism",
     "e2e": "playwright test",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
