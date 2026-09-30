@@ -103,15 +103,22 @@ export default async function PaginaSesiones({ params }: { params: Promise<{ id:
                           Editar
                         </Link>
                         <Menu etiqueta="QR y más">
+                          <Link href={`/admin/imprimir/${s.id}`} className={claseBoton.item}>
+                            Hoja de entrada y salida
+                          </Link>
+                          <Link href={`/admin/imprimir/${s.id}?solo=entrada`} className={claseBoton.item}>
+                            Hoja solo de entrada
+                          </Link>
+                          <Link href={`/admin/imprimir/${s.id}?solo=salida`} className={claseBoton.item}>
+                            Hoja solo de salida
+                          </Link>
+                          <SeparadorMenu />
                           <a href={`/api/admin/sesiones/${s.id}/qr/entrada`} className={claseBoton.item}>
-                            QR entrada
+                            Descargar QR de entrada (.png)
                           </a>
                           <a href={`/api/admin/sesiones/${s.id}/qr/salida`} className={claseBoton.item}>
-                            QR salida
+                            Descargar QR de salida (.png)
                           </a>
-                          <Link href={`/admin/imprimir/${s.id}`} className={claseBoton.item}>
-                            Hoja imprimible
-                          </Link>
                           {s.modo_apertura === 'manual' && (
                             <>
                               <SeparadorMenu />

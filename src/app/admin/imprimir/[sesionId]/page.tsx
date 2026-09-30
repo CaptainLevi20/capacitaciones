@@ -9,28 +9,50 @@ import { baseUrl, qrSvg, urlPublica } from '@/lib/qr';
 import { EncabezadoMarcas } from '@/components/publico/EncabezadoMarcas';
 import { BotonImprimir } from './BotonImprimir';
 
-function BloqueQr({ titulo, ayuda, svg, url }: { titulo: string; ayuda: string; svg: string; url: string }) {
+type Tipo = 'entrada' | 'salida';
+
+const TEXTOS: Record<Tipo, { titulo: string; ayuda: string }> = {
+  entrada: { titulo: 'ENTRADA', ayuda: 'Escanee al llegar' },
+  salida: { titulo: 'SALIDA', ayuda: 'Escanee al finalizar para evaluar la sesión' },
+};
+
+function BloqueQr({ tipo, svg, url, grande }: { tipo: Tipo; svg: string; url: string; grande: boolean }) {
   return (
     <div className="text-center">
-      <p className="text-3xl font-extrabold tracking-wide text-tinta">{titulo}</p>
-      <div className="mx-auto mt-3 w-full max-w-[3in]" dangerouslySetInnerHTML={{ __html: svg }} />
-      <p className="mt-2 text-base text-tinta">{ayuda}</p>
+      <p className={`font-extrabold tracking-wide text-tinta ${grande ? 'text-5xl' : 'text-3xl'}`}>{TEXTOS[tipo].titulo}</p>
+      <div
+        className={`mx-auto mt-3 w-full ${grande ? 'max-w-[4.5in]' : 'max-w-[3in]'}`}
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+      <p className={`mt-2 text-tinta ${grande ? 'text-xl' : 'text-base'}`}>{TEXTOS[tipo].ayuda}</p>
       <p className="mt-1 break-all text-xs text-apagado">{url}</p>
     </div>
   );
 }
 
-export default async function HojaImprimible({ params }: { params: Promise<{ sesionId: string }> }) {
+// ?solo=entrada o ?solo=salida imprime una hoja con un único código, más grande.
+export default async function HojaImprimible({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ sesionId: string }>;
+  searchParams: Promise<{ solo?: string }>;
+}) {
   const { sesionId } = await params;
+  const { solo } = await searchParams;
+  const tipos: Tipo[] = solo === 'entrada' || solo === 'salida' ? [solo] : ['entrada', 'salida'];
   const { db } = await requerirAdmin();
   const s = await obtenerSesion(db, sesionId);
   if (!s) notFound();
   const [evento, ctx] = await Promise.all([obtenerEvento(db, s.evento_id), cargarContextoEvento(db, s.evento_id)]);
   if (!evento) notFound();
   const base = baseUrl();
-  const urlEntrada = urlPublica(base, 'entrada', s.token_entrada);
-  const urlSalida = urlPublica(base, 'salida', s.token_salida);
-  const [svgEntrada, svgSalida] = await Promise.all([qrSvg(urlEntrada), qrSvg(urlSalida)]);
+  const codigos = await Promise.all(
+    tipos.map(async (tipo) => {
+      const url = urlPublica(base, tipo, tipo === 'entrada' ? s.token_entrada : s.token_salida);
+      return { tipo, url, svg: await qrSvg(url) };
+    }),
+  );
 
   return (
     <main className="mx-auto max-w-[8.5in] bg-white p-8 print:p-0">
@@ -51,9 +73,10 @@ export default async function HojaImprimible({ params }: { params: Promise<{ ses
         {formatearFechaHora(s.inicio)}
         {s.lugar ? ` · ${s.lugar}` : ''}
       </p>
-      <div className="mt-10 grid grid-cols-2 gap-10">
-        <BloqueQr titulo="ENTRADA" ayuda="Escanee al llegar" svg={svgEntrada} url={urlEntrada} />
-        <BloqueQr titulo="SALIDA" ayuda="Escanee al finalizar para evaluar la sesión" svg={svgSalida} url={urlSalida} />
+      <div className={`mt-10 grid gap-10 ${codigos.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {codigos.map((c) => (
+          <BloqueQr key={c.tipo} tipo={c.tipo} svg={c.svg} url={c.url} grande={codigos.length === 1} />
+        ))}
       </div>
     </main>
   );

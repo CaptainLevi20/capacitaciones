@@ -80,11 +80,30 @@ test('descarga el QR y muestra la hoja imprimible', async ({ page }) => {
   const fila = page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión de prueba/ });
   await fila.getByRole('button', { name: 'QR y más' }).click();
   const descarga = page.waitForEvent('download');
-  await fila.getByRole('link', { name: 'QR entrada' }).click();
+  await fila.getByRole('link', { name: 'Descargar QR de entrada (.png)' }).click();
   expect((await descarga).suggestedFilename()).toBe('sesion-1-entrada.png');
-  await fila.getByRole('link', { name: 'Hoja imprimible' }).click();
+  await fila.getByRole('link', { name: 'Hoja de entrada y salida' }).click();
   await expect(page.getByText('ENTRADA', { exact: true })).toBeVisible();
   await expect(page.getByText('SALIDA', { exact: true })).toBeVisible();
   await expect(page.getByText(`/r/${ev.tokenEntrada}`)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Imprimir / Guardar como PDF' })).toBeVisible();
+});
+
+test('imprime hojas con un solo código de entrada o de salida', async ({ page }) => {
+  const ev = await crearEventoPrueba(clienteServicioPrueba());
+  await iniciarSesionAdmin(page);
+  await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
+  const fila = page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión de prueba/ });
+  await fila.getByRole('button', { name: 'QR y más' }).click();
+  await fila.getByRole('link', { name: 'Hoja solo de entrada' }).click();
+  await expect(page.getByText('ENTRADA', { exact: true })).toBeVisible();
+  await expect(page.getByText('SALIDA', { exact: true })).toHaveCount(0);
+  await expect(page.getByText(`/r/${ev.tokenEntrada}`)).toBeVisible();
+
+  await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
+  await fila.getByRole('button', { name: 'QR y más' }).click();
+  await fila.getByRole('link', { name: 'Hoja solo de salida' }).click();
+  await expect(page.getByText('SALIDA', { exact: true })).toBeVisible();
+  await expect(page.getByText('ENTRADA', { exact: true })).toHaveCount(0);
+  await expect(page.getByText(`/s/${ev.tokenSalida}`)).toBeVisible();
 });
