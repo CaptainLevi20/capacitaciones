@@ -22,7 +22,7 @@ async function expectConstancia(page: Page) {
   await expect(constancia).toContainText('Sesión 1');
 }
 
-const casillaHabeas = (page: Page) => page.getByLabel(/He leído y autorizo/);
+const casillaHabeas = (page: Page) => page.getByLabel(/Autorizo el tratamiento/);
 const botonRegistrar = (page: Page) => page.getByRole('button', { name: 'Registrar entrada' });
 
 async function contarEntradas(sesionId: string) {
@@ -36,6 +36,7 @@ test('registra la entrada y guarda el consentimiento', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Evento de prueba' })).toBeVisible();
   await expect(page.getByTestId('texto-habeas')).toContainText('Autorizo el tratamiento');
   await expect(casillaHabeas(page)).not.toBeChecked();
+  await expect(page.getByRole('link', { name: /política/ })).toHaveCount(0);
   await llenarEntrada(page);
   await casillaHabeas(page).check();
   await botonRegistrar(page).click();

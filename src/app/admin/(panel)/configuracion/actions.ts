@@ -7,7 +7,7 @@ import { guardarConfiguracion } from '@/lib/repo/configuracion';
 import { validar } from '@/lib/domain/schemas-admin';
 
 const configuracionSchema = z.object({
-  habeas_texto: z.string().trim().min(20, 'El texto de autorización es demasiado corto'),
+  habeas_texto: z.string().trim().min(20, 'El texto de autorización es demasiado corto').max(300, 'El texto de la casilla debe ser breve (máximo 300 caracteres)'),
   habeas_url: z.string().trim().url('Enlace no válido').or(z.literal('')),
 });
 

@@ -67,6 +67,11 @@ describe('habeasSchema', () => {
     expect(() => validar(habeasSchema, { texto: 'corto', url_politica: '' })).toThrow('El texto de autorización es demasiado corto');
     expect(() => validar(habeasSchema, { texto: 'x'.repeat(20), url_politica: 'no-url' })).toThrow('Enlace no válido');
   });
+  it('limita el texto a 300 caracteres porque se muestra junto a la casilla', () => {
+    expect(() => validar(habeasSchema, { texto: 'x'.repeat(301), url_politica: '' })).toThrow(
+      'El texto de la casilla debe ser breve (máximo 300 caracteres)',
+    );
+  });
 });
 
 describe('puedeActivarse', () => {

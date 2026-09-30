@@ -47,7 +47,7 @@ export type DatosEvento = z.infer<typeof eventoSchema>;
 export const CAMPOS_EVENTO = ['nombre', 'cliente', 'capacitadores', 'dominio_correo', 'color_primario'];
 
 export const habeasSchema = z.object({
-  texto: z.string().trim().min(20, 'El texto de autorización es demasiado corto'),
+  texto: z.string().trim().min(20, 'El texto de autorización es demasiado corto').max(300, 'El texto de la casilla debe ser breve (máximo 300 caracteres)'),
   url_politica: z
     .string()
     .trim()

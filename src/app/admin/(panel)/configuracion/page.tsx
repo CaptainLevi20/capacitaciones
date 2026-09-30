@@ -13,15 +13,21 @@ export default async function PaginaConfiguracion() {
       <h1 className="font-serif text-[1.75rem] font-semibold text-tinta">Configuración</h1>
       <section className={claseTarjeta}>
         <p className="mb-3 text-sm text-apagado">
-          Texto que se copia a cada evento nuevo. Los eventos existentes conservan su propio texto.
+          Texto de la casilla de autorización que se copia a cada evento nuevo. Los eventos existentes conservan su
+          propio texto.
         </p>
         <FormularioAccion accion={guardarConfiguracionAccion} textoBoton="Guardar configuración">
-          <CampoAdmin etiqueta="Texto de autorización por defecto">
-            <textarea name="habeas_texto" rows={10} defaultValue={c.habeasTexto} className={claseInput} />
+          <CampoAdmin etiqueta="Texto de la casilla de autorización por defecto">
+            <input
+              name="habeas_texto"
+              required
+              maxLength={300}
+              defaultValue={c.habeasTexto}
+              placeholder="Autorizo el tratamiento de datos personales."
+              className={claseInput}
+            />
           </CampoAdmin>
-          <CampoAdmin etiqueta="Enlace a la política de tratamiento de datos (opcional)">
-            <input name="habeas_url" type="url" defaultValue={c.habeasUrl} className={claseInput} />
-          </CampoAdmin>
+          <input type="hidden" name="habeas_url" value="" />
         </FormularioAccion>
       </section>
     </div>

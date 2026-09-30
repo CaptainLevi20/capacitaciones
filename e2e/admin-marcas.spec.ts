@@ -53,7 +53,7 @@ test('rechaza un logo que no es imagen', async ({ page }) => {
 test('guarda el texto de Habeas Data por defecto', async ({ page }) => {
   await iniciarSesionAdmin(page);
   await page.getByRole('link', { name: 'Configuración' }).click();
-  await page.getByLabel('Texto de autorización por defecto').fill('Cláusula oficial de Avance Jurídico para pruebas.');
+  await page.getByLabel('Texto de la casilla de autorización por defecto').fill('Cláusula oficial de Avance Jurídico para pruebas.');
   await page.getByRole('button', { name: 'Guardar configuración' }).click();
   await expect(page.getByText('Configuración guardada')).toBeVisible();
 });

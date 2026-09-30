@@ -91,17 +91,21 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       </section>
 
       <section className={claseTarjeta} data-testid="seccion-habeas">
-        <h2 className="mb-1 font-serif text-xl font-semibold text-tinta">Autorización de tratamiento de datos (Habeas Data)</h2>
+        <h2 className="mb-1 font-serif text-xl font-semibold text-tinta">Autorización de datos personales</h2>
         <p className="mb-3 text-sm text-apagado">
-          Versión vigente: {vigente.version}. Cada cambio crea una versión nueva; los registros conservan la versión que
-          aceptaron.
+          Es el texto que acompaña la casilla obligatoria de los formularios. Versión vigente: {vigente.version}. Cada
+          cambio crea una versión nueva; los registros conservan la versión que aceptaron.
         </p>
         <FormularioAccion accion={guardarHabeasAccion.bind(null, id)} textoBoton="Guardar nueva versión">
-          <CampoAdmin etiqueta="Texto de la autorización">
-            <textarea name="texto" rows={8} defaultValue={vigente.texto} className={claseInput} />
-          </CampoAdmin>
-          <CampoAdmin etiqueta="Enlace a la política (opcional)">
-            <input name="url_politica" type="url" defaultValue={vigente.url_politica ?? ''} className={claseInput} />
+          <CampoAdmin etiqueta="Texto de la casilla de autorización">
+            <input
+              name="texto"
+              required
+              maxLength={300}
+              defaultValue={vigente.texto}
+              placeholder="Autorizo el tratamiento de datos personales."
+              className={claseInput}
+            />
           </CampoAdmin>
         </FormularioAccion>
         {evento.habeas.length > 1 && (

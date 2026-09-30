@@ -66,7 +66,7 @@ test('sin entrada pide datos y Habeas Data, y marca sin_entrada', async ({ page 
   await page.getByLabel('Correo institucional').fill('lrojas@procuraduria.gov.co');
   await page.getByLabel('Dependencia').fill('Secretaría General');
   await page.getByLabel('Cargo').fill('Técnico');
-  await page.getByLabel(/He leído y autorizo/).check();
+  await page.getByLabel(/Autorizo el tratamiento/).check();
   await responderEncuesta(page);
   await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
   await expect(page.getByRole('heading', { name: 'Salida registrada' })).toBeVisible();
@@ -116,7 +116,7 @@ test('si cambia la autorización de datos mientras se diligencia, pide recargar 
   await page.getByLabel('Correo institucional').fill('lrojas@procuraduria.gov.co');
   await page.getByLabel('Dependencia').fill('Secretaría General');
   await page.getByLabel('Cargo').fill('Técnico');
-  await page.getByLabel(/He leído y autorizo/).check();
+  await page.getByLabel(/Autorizo el tratamiento/).check();
   await responderEncuesta(page);
   await db.from('evento_habeas_versiones').insert({ evento_id: ev.eventoId, version: 2, texto: 'Texto nuevo de autorización.' });
   await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();

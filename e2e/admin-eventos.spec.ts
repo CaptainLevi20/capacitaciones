@@ -27,7 +27,7 @@ test('crea, configura, activa y duplica un evento', async ({ page }) => {
 
   const habeas = page.getByTestId('seccion-habeas');
   await habeas
-    .getByLabel('Texto de la autorización')
+    .getByLabel('Texto de la casilla de autorización')
     .fill('Autorizo a Avance Jurídico el tratamiento de mis datos personales conforme a la Ley 1581 de 2012.');
   await habeas.getByRole('button', { name: 'Guardar nueva versión' }).click();
   await expect(habeas.getByText('Versión 2 vigente')).toBeVisible();
