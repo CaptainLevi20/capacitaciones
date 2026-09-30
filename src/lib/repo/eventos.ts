@@ -3,6 +3,7 @@ import type { DatosEvento } from '@/lib/domain/schemas-admin';
 import type { Pregunta } from '@/lib/domain/encuesta';
 import { HABEAS_PENDIENTE, type EstadoEvento } from '@/lib/domain/constantes';
 import { ErrorNegocio } from '@/lib/errores';
+import { proximaSesion } from '@/lib/domain/sesion-estado';
 import { obtenerConfiguracion } from './configuracion';
 
 export interface MarcaEvento {
@@ -33,6 +34,7 @@ export interface EventoResumen {
   cliente: string | null;
   estado: EstadoEvento;
   sesiones: number;
+  proxima: Date | null;
 }
 
 export function puedeActivarse(textoHabeas: string): string | null {
@@ -44,16 +46,22 @@ export function puedeActivarse(textoHabeas: string): string | null {
 export async function listarEventos(db: Db): Promise<EventoResumen[]> {
   const { data, error } = await db
     .from('eventos')
-    .select('id, nombre, cliente, estado, sesiones(count)')
+    .select('id, nombre, cliente, estado, sesiones(inicio, fin)')
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return (data as unknown as (Omit<EventoResumen, 'sesiones'> & { sesiones: { count: number }[] })[]).map((e) => ({
-    id: e.id,
-    nombre: e.nombre,
-    cliente: e.cliente,
-    estado: e.estado,
-    sesiones: e.sesiones[0]?.count ?? 0,
-  }));
+  const ahora = new Date();
+  type Fila = Omit<EventoResumen, 'sesiones' | 'proxima'> & { sesiones: { inicio: string; fin: string }[] };
+  return (data as unknown as Fila[]).map((e) => {
+    const sesiones = e.sesiones.map((s) => ({ inicio: new Date(s.inicio), fin: new Date(s.fin) }));
+    return {
+      id: e.id,
+      nombre: e.nombre,
+      cliente: e.cliente,
+      estado: e.estado,
+      sesiones: sesiones.length,
+      proxima: proximaSesion(sesiones, ahora)?.inicio ?? null,
+    };
+  });
 }
 
 export async function obtenerEvento(db: Db, id: string): Promise<EventoDetalle | null> {

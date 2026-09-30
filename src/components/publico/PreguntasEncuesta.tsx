@@ -17,25 +17,27 @@ function OpcionesNumericas({
   error?: string;
 }) {
   const valores = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  // 1 a 5 cabe en una fila; 0 a 10 se reparte en dos filas parejas en el celular.
+  const columnas = valores.length > 5 ? 'grid-cols-6 sm:grid-cols-11' : 'grid-cols-5';
   return (
     <fieldset>
-      <legend className="text-sm font-medium text-slate-800">{pregunta}</legend>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <legend className="text-[0.9375rem] font-medium text-tinta">{pregunta}</legend>
+      <div className={`mt-2.5 grid gap-2 ${columnas}`}>
         {valores.map((v) => (
           <label key={v} className="relative">
             <input type="radio" name={nombre} value={v} required className="peer sr-only" />
-            <span className="flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border border-slate-400 px-2 text-base text-slate-900 peer-checked:border-[var(--color-primario)] peer-checked:bg-[var(--color-primario)] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-primario)]">
+            <span className="flex h-12 cursor-pointer items-center justify-center rounded-lg border border-linea bg-white text-base font-medium text-tinta tabular-nums peer-checked:border-[var(--color-primario)] peer-checked:bg-[var(--color-primario)] peer-checked:text-[var(--color-sobre-primario)] peer-focus-visible:ring-3 peer-focus-visible:ring-[var(--color-primario)]/40">
               {v}
             </span>
           </label>
         ))}
       </div>
-      <div className="mt-1 flex justify-between text-xs text-slate-600">
+      <div className="mt-1.5 flex justify-between text-[0.8125rem] text-apagado">
         <span>{extremos[0]}</span>
         <span>{extremos[1]}</span>
       </div>
       {error && (
-        <p role="alert" className="mt-1 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm font-medium text-peligro">
           {error}
         </p>
       )}
@@ -51,7 +53,7 @@ export function PreguntasEncuesta({
   errores: Record<string, string>;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {preguntas.map((p) => {
         const nombre = `p_${p.clave}`;
         if (p.tipo === 'texto') {

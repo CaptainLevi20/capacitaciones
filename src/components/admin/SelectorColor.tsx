@@ -28,7 +28,7 @@ export function SelectorColor({
           aria-label={`${etiqueta}: selector`}
           value={(valido ? valor : COLOR_DEFECTO).toLowerCase()}
           onChange={(e) => setValor(e.target.value.toUpperCase())}
-          className={`h-9 w-12 shrink-0 cursor-pointer rounded border border-slate-300 bg-white p-0.5 ${valido ? '' : 'opacity-30'}`}
+          className={`h-9 w-12 shrink-0 cursor-pointer rounded border border-linea bg-white p-0.5 ${valido ? '' : 'opacity-30'}`}
         />
         <input
           name={nombre}
@@ -37,14 +37,14 @@ export function SelectorColor({
           onChange={(e) => setValor(e.target.value.trim())}
           placeholder="#RRGGBB"
           maxLength={7}
-          className={`${claseInput} mt-0 w-28 font-mono`}
+          className={`${claseInput} mt-0 max-w-32 font-mono`}
         />
-        <button type="button" onClick={() => setValor('')} className={claseBoton.secundario}>
+        <button type="button" onClick={() => setValor('')} className={`${claseBoton.secundario} shrink-0 whitespace-nowrap`}>
           Sin color
         </button>
       </div>
-      {!valor && <p className="mt-1 text-xs text-slate-500">{textoVacio}</p>}
-      {valor && !valido && <p className="mt-1 text-xs text-red-700">Use el formato #RRGGBB, por ejemplo #003366.</p>}
+      {!valor && <p className="mt-1 text-xs text-apagado">{textoVacio}</p>}
+      {valor && !valido && <p className="mt-1 text-xs text-peligro">Use el formato #RRGGBB, por ejemplo #003366.</p>}
     </div>
   );
 }

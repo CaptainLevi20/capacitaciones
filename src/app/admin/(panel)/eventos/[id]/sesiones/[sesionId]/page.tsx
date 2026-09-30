@@ -24,7 +24,7 @@ export default async function PaginaEditarSesion({
     <div className="space-y-6">
       <EncabezadoEvento evento={evento} actual="sesiones" />
       <section className={claseTarjeta}>
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Editar sesión {s.numero}</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Editar sesión {s.numero}</h2>
         <FormularioAccion accion={actualizarSesionAccion.bind(null, id, sesionId)} textoBoton="Guardar sesión">
           <div className="grid gap-3 sm:grid-cols-2">
             <CampoAdmin etiqueta="Número">
@@ -68,7 +68,7 @@ export default async function PaginaEditarSesion({
             </CampoAdmin>
           </div>
         </FormularioAccion>
-        <Link href={`/admin/eventos/${id}/sesiones`} className="mt-4 inline-block text-sm text-slate-600 underline">
+        <Link href={`/admin/eventos/${id}/sesiones`} className="mt-4 inline-block text-sm text-apagado underline">
           ← Volver a sesiones
         </Link>
       </section>

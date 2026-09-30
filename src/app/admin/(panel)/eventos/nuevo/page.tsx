@@ -8,7 +8,7 @@ export default async function PaginaNuevoEvento() {
   await requerirAdmin();
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Nuevo evento</h1>
+      <h1 className="font-serif text-[1.75rem] font-semibold text-tinta">Nuevo evento</h1>
       <section className={claseTarjeta}>
         <FormularioAccion accion={crearEventoAccion} textoBoton="Crear evento">
           <CamposEvento />

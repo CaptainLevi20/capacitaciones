@@ -10,9 +10,9 @@ export default async function PaginaConfiguracion() {
   const c = await obtenerConfiguracion(db);
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Configuración</h1>
+      <h1 className="font-serif text-[1.75rem] font-semibold text-tinta">Configuración</h1>
       <section className={claseTarjeta}>
-        <p className="mb-3 text-sm text-slate-600">
+        <p className="mb-3 text-sm text-apagado">
           Texto que se copia a cada evento nuevo. Los eventos existentes conservan su propio texto.
         </p>
         <FormularioAccion accion={guardarConfiguracionAccion} textoBoton="Guardar configuración">

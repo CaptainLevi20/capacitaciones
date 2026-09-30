@@ -6,12 +6,12 @@ export function CajaHabeas({
   error?: string;
 }) {
   return (
-    <fieldset className="rounded-lg border border-slate-400 p-3">
-      <legend className="px-1 text-sm font-semibold text-slate-800">
+    <fieldset>
+      <legend className="mb-3 font-serif text-lg font-semibold text-tinta">
         Autorización de tratamiento de datos personales
       </legend>
       <div
-        className="max-h-48 overflow-y-auto whitespace-pre-line text-sm text-slate-700"
+        className="max-h-44 overflow-y-auto rounded-lg bg-papel/70 p-3.5 text-sm leading-relaxed whitespace-pre-line text-apagado"
         tabIndex={0}
         data-testid="texto-habeas"
       >
@@ -22,20 +22,28 @@ export function CajaHabeas({
           href={habeas.urlPolitica}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-[var(--color-primario)] underline"
+          className="mt-2 inline-block text-sm font-medium text-[var(--color-primario)] underline underline-offset-2"
         >
           Consultar la política de tratamiento de datos
         </a>
       )}
       <input type="hidden" name="habeas_version_id" value={habeas.id} />
-      <label className="mt-3 flex min-h-11 items-start gap-3">
-        <input type="checkbox" name="acepta_habeas" required className="mt-1 h-5 w-5 shrink-0" />
-        <span className="text-sm text-slate-900">
+      <label
+        className={`mt-3 flex min-h-12 cursor-pointer items-start gap-3 rounded-lg border p-3.5 ${error ? 'border-peligro bg-peligro-suave/40' : 'border-linea'}`}
+      >
+        <input
+          type="checkbox"
+          name="acepta_habeas"
+          required
+          aria-invalid={error ? true : undefined}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-primario)]"
+        />
+        <span className="text-[0.9375rem] text-tinta">
           He leído y autorizo el tratamiento de mis datos personales en los términos anteriores.
         </span>
       </label>
       {error && (
-        <p role="alert" className="mt-1 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm font-medium text-peligro">
           {error}
         </p>
       )}

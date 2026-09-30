@@ -12,7 +12,7 @@ import {
   type DatosPersonales,
 } from '@/lib/domain/schemas';
 import { separarRespuestas } from '@/lib/domain/encuesta';
-import { MENSAJE_HABEAS_CAMBIO, type ResultadoEnvio } from '@/lib/envio';
+import { MENSAJE_ERROR_SISTEMA, MENSAJE_HABEAS_CAMBIO, type ResultadoEnvio } from '@/lib/envio';
 
 export type ResultadoConsulta =
   | {
@@ -46,7 +46,7 @@ export async function consultarDocumento(token: string, fd: FormData): Promise<R
 }
 
 export async function enviarSalida(token: string, fd: FormData): Promise<ResultadoEnvio> {
-  if (fd.get('sitio_web')) return { ok: true, nombres: '' };
+  if (fd.get('sitio_web')) return { ok: true, nombres: '', registradoEn: new Date().toISOString() };
   const s = await prepararSolicitud(token, 'envio');
   if ('error' in s) return { ok: false, errores: {}, mensaje: s.error };
   const valores = Object.fromEntries(fd);
@@ -69,11 +69,16 @@ export async function enviarSalida(token: string, fd: FormData): Promise<Resulta
   if (!encuesta.success || Object.keys(errores).length) return { ok: false, errores };
 
   const { respuestas, comentario } = separarRespuestas(s.sesion.preguntas, encuesta.data);
-  await registrarSalida(
-    s.db,
-    { id: s.sesion.id, habeasId: s.sesion.habeas.id },
-    { documento: doc.data, personales, respuestas, comentario },
-    s.meta,
-  );
-  return { ok: true, nombres: entrada?.nombres ?? personales?.nombres ?? '' };
+  try {
+    await registrarSalida(
+      s.db,
+      { id: s.sesion.id, habeasId: s.sesion.habeas.id },
+      { documento: doc.data, personales, respuestas, comentario },
+      s.meta,
+    );
+  } catch (e) {
+    console.error(e);
+    return { ok: false, errores: {}, mensaje: MENSAJE_ERROR_SISTEMA };
+  }
+  return { ok: true, nombres: entrada?.nombres ?? personales?.nombres ?? '', registradoEn: new Date().toISOString() };
 }

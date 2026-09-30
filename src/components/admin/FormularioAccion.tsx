@@ -35,17 +35,17 @@ export function FormularioAccion({
           {pendiente ? 'Procesando…' : textoBoton}
         </button>
         {resultado?.ok && resultado.mensaje && (
-          <span role="status" className="text-sm text-green-700">
+          <span role="status" className="text-sm text-exito">
             {resultado.mensaje}
           </span>
         )}
         {resultado && !resultado.ok && (
-          <span role="alert" className="text-sm text-red-700">
+          <span role="alert" className="text-sm text-peligro">
             {resultado.error}
           </span>
         )}
         {errorRed && (
-          <span role="alert" className="text-sm text-red-700">
+          <span role="alert" className="text-sm text-peligro">
             No se pudo conectar. Intente de nuevo.
           </span>
         )}

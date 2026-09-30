@@ -33,12 +33,12 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       <EncabezadoEvento evento={evento} actual="configuracion" />
 
       <section className={claseTarjeta} data-testid="seccion-estado">
-        <h2 className="mb-2 text-lg font-semibold text-slate-900">Estado</h2>
-        <p className="mb-3 text-sm text-slate-700">
+        <h2 className="mb-2 font-serif text-xl font-semibold text-tinta">Estado</h2>
+        <p className="mb-3 text-sm text-tinta">
           Estado actual: <strong>{ETIQUETA_EVENTO[evento.estado]}</strong>. Solo los eventos activos aceptan registros.
         </p>
         {vigente.texto.includes(HABEAS_PENDIENTE) && (
-          <p className="mb-3 text-sm text-amber-800">
+          <p className="mb-4 rounded-lg border-l-4 border-aviso bg-aviso-suave px-4 py-3 text-sm text-aviso">
             Falta la cláusula oficial de Habeas Data: el evento no se puede activar todavía.
           </p>
         )}
@@ -73,14 +73,14 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       </section>
 
       <section className={claseTarjeta} data-testid="seccion-datos">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Datos generales</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Datos generales</h2>
         <FormularioAccion accion={guardarDatosAccion.bind(null, id)} textoBoton="Guardar datos">
           <CamposEvento evento={evento} />
         </FormularioAccion>
       </section>
 
       <section className={claseTarjeta} data-testid="seccion-cobranding">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Co-branding</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Co-branding</h2>
         <EditorCoBranding
           accion={guardarCoBrandingAccion.bind(null, id)}
           opciones={marcas
@@ -91,8 +91,8 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       </section>
 
       <section className={claseTarjeta} data-testid="seccion-habeas">
-        <h2 className="mb-1 text-lg font-semibold text-slate-900">Autorización de tratamiento de datos (Habeas Data)</h2>
-        <p className="mb-3 text-sm text-slate-600">
+        <h2 className="mb-1 font-serif text-xl font-semibold text-tinta">Autorización de tratamiento de datos (Habeas Data)</h2>
+        <p className="mb-3 text-sm text-apagado">
           Versión vigente: {vigente.version}. Cada cambio crea una versión nueva; los registros conservan la versión que
           aceptaron.
         </p>
@@ -105,7 +105,7 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
           </CampoAdmin>
         </FormularioAccion>
         {evento.habeas.length > 1 && (
-          <details className="mt-3 text-sm text-slate-600">
+          <details className="mt-3 text-sm text-apagado">
             <summary>Historial ({evento.habeas.length} versiones)</summary>
             <ol className="mt-2 list-inside list-disc">
               {evento.habeas.map((h) => (
@@ -119,7 +119,7 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       </section>
 
       <section className={claseTarjeta} data-testid="seccion-encuesta">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Encuesta de salida</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Encuesta de salida</h2>
         <FormularioAccion accion={guardarPreguntasAccion.bind(null, id)} textoBoton="Guardar encuesta">
           {evento.preguntas.map((p) => (
             <div key={p.clave} className="flex items-center gap-3">
@@ -135,7 +135,7 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
                 aria-label={`Texto de la pregunta ${p.clave}`}
                 className={`${claseInput} mt-0`}
               />
-              <span className="w-44 shrink-0 text-xs text-slate-500">{ETIQUETA_TIPO_PREGUNTA[p.tipo]}</span>
+              <span className="w-44 shrink-0 text-xs text-apagado">{ETIQUETA_TIPO_PREGUNTA[p.tipo]}</span>
             </div>
           ))}
         </FormularioAccion>

@@ -50,7 +50,7 @@ export function EditorCoBranding({
   return (
     <FormularioAccion accion={accion} textoBoton="Guardar co-branding">
       <input type="hidden" name="marcas_json" value={json} />
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-linea">
         {items.map((it, idx) => (
           <li key={it.marcaId} className="flex items-center gap-3 py-2 text-sm">
             <label className="flex flex-1 items-center gap-2">
@@ -76,9 +76,9 @@ export function EditorCoBranding({
           </li>
         ))}
       </ul>
-      <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Vista previa del encabezado</p>
-        {vista.length ? <EncabezadoMarcas marcas={vista} /> : <p className="text-sm text-slate-500">Sin logos visibles</p>}
+      <div className="rounded-lg border border-linea bg-white p-4">
+        <p className="mb-2 text-xs uppercase tracking-wide text-apagado">Vista previa del encabezado</p>
+        {vista.length ? <EncabezadoMarcas marcas={vista} /> : <p className="text-sm text-apagado">Sin logos visibles</p>}
       </div>
     </FormularioAccion>
   );

@@ -32,7 +32,8 @@ test('crea sesiones con los selectores y las abre y cierra', async ({ page }) =>
   await expect(fila).toContainText('Abierta (manual)');
   await fila.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await expect(fila).toContainText('Cerrada (manual)');
-  await fila.getByRole('button', { name: 'Automático', exact: true }).click();
+  await fila.getByRole('button', { name: 'QR y más' }).click();
+  await fila.getByRole('button', { name: 'Volver a apertura automática' }).click();
   await expect(fila).toContainText('Programada');
 });
 
@@ -77,6 +78,7 @@ test('descarga el QR y muestra la hoja imprimible', async ({ page }) => {
   await iniciarSesionAdmin(page);
   await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
   const fila = page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión de prueba/ });
+  await fila.getByRole('button', { name: 'QR y más' }).click();
   const descarga = page.waitForEvent('download');
   await fila.getByRole('link', { name: 'QR entrada' }).click();
   expect((await descarga).suggestedFilename()).toBe('sesion-1-entrada.png');

@@ -41,7 +41,7 @@ export default async function PaginaDatos({
 
       <section className={claseTarjeta}>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-900">Resumen por sesión</h2>
+          <h2 className="font-serif text-xl font-semibold text-tinta">Resumen por sesión</h2>
           <a href={`/api/admin/exportar?${exportar}`} className={claseBoton.primario}>
             Descargar Excel {sesionId ? '(sesión filtrada)' : '(evento completo)'}
           </a>
@@ -49,7 +49,7 @@ export default async function PaginaDatos({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-600">
+              <tr className="border-b border-linea text-apagado">
                 <th className="py-2 pr-3">Sesión</th>
                 <th className="pr-3">Entradas</th>
                 <th className="pr-3">Salidas</th>
@@ -70,15 +70,15 @@ export default async function PaginaDatos({
                 return (
                   <tr
                     key={s.id}
-                    className="border-b border-slate-100 align-top"
+                    className="border-b border-linea align-top"
                     data-testid={`resumen-sesion-${s.numero}`}
                   >
                     <td className="py-2 pr-3">
                       <span className="font-semibold">Sesión {s.numero}</span>
                       <br />
-                      <span className="text-xs text-slate-500">{formatearFechaHora(s.inicio)}</span>
+                      <span className="text-xs text-apagado">{formatearFechaHora(s.inicio)}</span>
                       {r.comentarios.length > 0 && (
-                        <details className="mt-1 text-xs text-slate-600">
+                        <details className="mt-1 text-xs text-apagado">
                           <summary>{r.comentarios.length} comentarios</summary>
                           <ul className="mt-1 list-inside list-disc">
                             {r.comentarios.map((c, i) => (
@@ -108,7 +108,7 @@ export default async function PaginaDatos({
       </section>
 
       <section className={claseTarjeta}>
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Registros</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Registros</h2>
         <form className="mb-4 flex flex-wrap items-end gap-3">
           <CampoAdmin etiqueta="Sesión">
             <select name="sesion" defaultValue={sesionId ?? ''} className={claseInput}>
@@ -138,12 +138,12 @@ export default async function PaginaDatos({
           </button>
         </form>
         {filas.length === 0 ? (
-          <p className="text-slate-600">No hay registros con estos filtros.</p>
+          <p className="text-apagado">No hay registros con estos filtros.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-600">
+                <tr className="border-b border-linea text-apagado">
                   <th className="py-2 pr-3">Sesión</th>
                   <th className="pr-3">Documento</th>
                   <th className="pr-3">Nombre</th>
@@ -157,7 +157,7 @@ export default async function PaginaDatos({
               </thead>
               <tbody>
                 {filas.slice(0, MAX_FILAS_EN_PANTALLA).map((f) => (
-                  <tr key={`${f.sesion_id}-${f.asistente_id}`} className="border-b border-slate-100">
+                  <tr key={`${f.sesion_id}-${f.asistente_id}`} className="border-b border-linea">
                     <td className="py-2 pr-3">{f.sesion_numero}</td>
                     <td className="pr-3">
                       {f.tipo_documento} {f.numero_documento}
@@ -178,7 +178,7 @@ export default async function PaginaDatos({
               </tbody>
             </table>
             {filas.length > MAX_FILAS_EN_PANTALLA && (
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-apagado">
                 Se muestran {MAX_FILAS_EN_PANTALLA} de {filas.length} registros. Descargue el Excel para verlos todos.
               </p>
             )}

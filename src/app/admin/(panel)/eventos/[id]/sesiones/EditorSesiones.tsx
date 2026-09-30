@@ -75,7 +75,7 @@ export function EditorSesiones({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="text-slate-600">
+            <tr className="text-apagado">
               <th className="pb-1 pr-2">Nº</th>
               <th className="pb-1 pr-2">Fecha</th>
               <th className="pb-1 pr-2">Inicio</th>
@@ -89,7 +89,7 @@ export function EditorSesiones({
             {filas.map((f, i) => {
               const n = i + 1;
               return (
-                <tr key={f.clave} className={erroresFila[i] ? 'bg-red-50' : ''}>
+                <tr key={f.clave} className={erroresFila[i] ? 'bg-peligro-suave' : ''}>
                   <td className="py-1 pr-2">
                     <input
                       type="number"
@@ -152,7 +152,7 @@ export function EditorSesiones({
                       disabled={filas.length === 1}
                       aria-label={`Quitar fila ${n}`}
                       title="Quitar fila"
-                      className="px-2 text-slate-500 hover:text-red-700 disabled:opacity-30"
+                      className="px-2 text-apagado hover:text-peligro disabled:opacity-30"
                     >
                       🗑
                     </button>
@@ -164,7 +164,7 @@ export function EditorSesiones({
         </table>
       </div>
       {listaErrores.length > 0 && (
-        <ul role="alert" className="space-y-1 text-sm text-red-700">
+        <ul role="alert" className="space-y-1 text-sm text-peligro">
           {listaErrores.map(([indice, mensaje]) => (
             <li key={indice}>
               Fila {Number(indice) + 1}: {mensaje}
@@ -180,17 +180,17 @@ export function EditorSesiones({
           {pendiente ? 'Procesando…' : 'Crear sesiones'}
         </button>
         {resultado?.ok && resultado.mensaje && (
-          <span role="status" className="text-sm text-green-700">
+          <span role="status" className="text-sm text-exito">
             {resultado.mensaje}
           </span>
         )}
         {resultado && !resultado.ok && (
-          <span role="alert" className="text-sm text-red-700">
+          <span role="alert" className="text-sm text-peligro">
             {resultado.error}
           </span>
         )}
         {errorRed && (
-          <span role="alert" className="text-sm text-red-700">
+          <span role="alert" className="text-sm text-peligro">
             No se pudo conectar. Intente de nuevo.
           </span>
         )}

@@ -1,32 +1,30 @@
 import Link from 'next/link';
 import { requerirAdmin } from '@/lib/auth/admin';
 import { cerrarSesion } from '@/app/admin/login/actions';
+import { NavPanel } from '@/components/admin/NavPanel';
 
 export default async function LayoutPanel({ children }: { children: React.ReactNode }) {
   const { user } = await requerirAdmin();
   return (
-    <div className="min-h-dvh bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-5 px-4 py-3 text-sm">
-          <span className="font-bold text-slate-900">Capacitaciones · Avance Jurídico</span>
-          <Link href="/admin" className="text-slate-700 hover:underline">
-            Eventos
+    <div className="min-h-dvh">
+      <header className="bg-tinta text-white">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3">
+          <Link href="/admin" className="leading-tight">
+            <span className="block font-serif text-lg font-semibold">Avance Jurídico</span>
+            <span className="block text-xs text-white/60">Registro de capacitaciones</span>
           </Link>
-          <Link href="/admin/marcas" className="text-slate-700 hover:underline">
-            Marcas
-          </Link>
-          <Link href="/admin/configuracion" className="text-slate-700 hover:underline">
-            Configuración
-          </Link>
-          <span className="ml-auto text-slate-500">{user.email}</span>
-          <form action={cerrarSesion}>
-            <button type="submit" className="text-slate-700 underline">
-              Salir
-            </button>
-          </form>
-        </nav>
+          <NavPanel />
+          <div className="ml-auto flex items-center gap-4 text-sm">
+            <span className="hidden text-white/60 sm:inline">{user.email}</span>
+            <form action={cerrarSesion}>
+              <button type="submit" className="rounded-md px-2 py-1 text-white/80 underline-offset-2 hover:text-white hover:underline">
+                Salir
+              </button>
+            </form>
+          </div>
+        </div>
       </header>
-      <div className="mx-auto max-w-6xl px-4 py-6">{children}</div>
+      <div className="mx-auto max-w-6xl px-4 py-8">{children}</div>
     </div>
   );
 }

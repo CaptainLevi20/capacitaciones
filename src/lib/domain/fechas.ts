@@ -35,3 +35,23 @@ export function formatearFechaHora(d: Date | string): string {
     timeStyle: 'short',
   }).format(new Date(d));
 }
+
+export function formatearFecha(d: Date | string): string {
+  return new Intl.DateTimeFormat('es-CO', { timeZone: ZONA_HORARIA, dateStyle: 'long' }).format(new Date(d));
+}
+
+export function formatearHora(d: Date | string): string {
+  return new Intl.DateTimeFormat('es-CO', { timeZone: ZONA_HORARIA, timeStyle: 'short' }).format(new Date(d));
+}
+
+// «mié 14 oct»: para tablas y listas donde la fecha larga ocupa demasiado.
+export function formatearFechaCorta(d: Date | string): string {
+  const partes = new Intl.DateTimeFormat('es-CO', {
+    timeZone: ZONA_HORARIA,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).formatToParts(new Date(d));
+  const valor = (tipo: string) => partes.find((p) => p.type === tipo)?.value.replace('.', '') ?? '';
+  return `${valor('weekday')} ${valor('day')} ${valor('month')}`;
+}

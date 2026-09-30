@@ -27,3 +27,9 @@ export function estadoSesion(s: VentanaSesion, ahora: Date): EstadoSesion {
   if (ahora > cierra) return 'cerrada';
   return 'abierta';
 }
+
+// La sesión en curso o, si no hay, la siguiente en empezar.
+export function proximaSesion<T extends { inicio: Date; fin: Date }>(sesiones: T[], ahora: Date): T | null {
+  const pendientes = sesiones.filter((s) => s.fin > ahora).sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+  return pendientes[0] ?? null;
+}

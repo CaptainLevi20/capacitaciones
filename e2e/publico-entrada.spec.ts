@@ -15,6 +15,13 @@ async function llenarEntrada(page: Page, documento = '1.020.345.678') {
   await page.getByLabel('Cargo').fill('Profesional');
 }
 
+async function expectConstancia(page: Page) {
+  const constancia = page.getByTestId('constancia');
+  await expect(constancia.getByRole('heading', { name: 'Entrada registrada' })).toBeVisible();
+  await expect(constancia).toContainText('Ana María');
+  await expect(constancia).toContainText('Sesión 1');
+}
+
 const casillaHabeas = (page: Page) => page.getByLabel(/He leído y autorizo/);
 const botonRegistrar = (page: Page) => page.getByRole('button', { name: 'Registrar entrada' });
 
@@ -32,7 +39,7 @@ test('registra la entrada y guarda el consentimiento', async ({ page }) => {
   await llenarEntrada(page);
   await casillaHabeas(page).check();
   await botonRegistrar(page).click();
-  await expect(page.getByText('Registro exitoso, Ana María')).toBeVisible();
+  await expectConstancia(page);
 
   const { data } = await clienteServicioPrueba()
     .from('entradas')
@@ -61,7 +68,7 @@ test('registrarse dos veces no duplica la entrada', async ({ page }) => {
     await llenarEntrada(page);
     await casillaHabeas(page).check();
     await botonRegistrar(page).click();
-    await expect(page.getByText('Registro exitoso, Ana María')).toBeVisible();
+    await expectConstancia(page);
   }
   expect(await contarEntradas(ev.sesionId)).toBe(1);
 });
@@ -90,7 +97,15 @@ test('si se cae la conexión conserva los datos y permite reintentar', async ({ 
   await expect(casillaHabeas(page)).toBeChecked();
   await context.setOffline(false);
   await botonRegistrar(page).click();
-  await expect(page.getByText('Registro exitoso, Ana María')).toBeVisible();
+  await expectConstancia(page);
+});
+
+test('abre el teclado numérico para la cédula y el de texto para el pasaporte', async ({ page }) => {
+  const ev = await crearEventoPrueba(clienteServicioPrueba());
+  await page.goto(`/r/${ev.tokenEntrada}`);
+  await expect(page.getByLabel('Número de documento')).toHaveAttribute('inputmode', 'numeric');
+  await page.getByLabel('Tipo de documento').selectOption('PA');
+  await expect(page.getByLabel('Número de documento')).toHaveAttribute('inputmode', 'text');
 });
 
 test('advierte si el correo no es del dominio institucional', async ({ page }) => {

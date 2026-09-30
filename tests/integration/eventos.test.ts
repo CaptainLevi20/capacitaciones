@@ -107,8 +107,10 @@ describe('duplicarEvento', () => {
 });
 
 describe('listarEventos', () => {
-  it('incluye el número de sesiones', async () => {
+  it('incluye el número de sesiones y la próxima sesión', async () => {
     const ev = await crearEventoPrueba(db);
-    expect((await listarEventos(db)).find((e) => e.id === ev.eventoId)!.sesiones).toBe(1);
+    const fila = (await listarEventos(db)).find((e) => e.id === ev.eventoId)!;
+    expect(fila.sesiones).toBe(1);
+    expect(fila.proxima).toBeInstanceOf(Date);
   });
 });

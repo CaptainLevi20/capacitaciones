@@ -15,7 +15,7 @@ export function FormularioLogin() {
         <input name="clave" type="password" autoComplete="current-password" required className={claseInput} />
       </CampoAdmin>
       {estado?.error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-peligro">
           {estado.error}
         </p>
       )}

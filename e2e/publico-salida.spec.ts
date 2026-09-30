@@ -50,7 +50,7 @@ test('con entrada previa reconoce a la persona aunque escriba el documento con p
   await expect(page.getByTestId('texto-habeas')).toHaveCount(0);
   await responderEncuesta(page);
   await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
-  await expect(page.getByText('¡Gracias!')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salida registrada' })).toBeVisible();
   expect(await consolidado(ev.sesionId)).toEqual([
     { estado_asistencia: 'completa', promedio_escala: 5, nps: 10, comentario: 'Muy buena sesión' },
   ]);
@@ -69,7 +69,7 @@ test('sin entrada pide datos y Habeas Data, y marca sin_entrada', async ({ page 
   await page.getByLabel(/He leído y autorizo/).check();
   await responderEncuesta(page);
   await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
-  await expect(page.getByText('¡Gracias!')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salida registrada' })).toBeVisible();
   expect((await consolidado(ev.sesionId))[0].estado_asistencia).toBe('sin_entrada');
 });
 
@@ -101,7 +101,7 @@ test('varias personas salen desde la misma red sin quedar bloqueadas', async ({ 
     await expect(page.getByText('Hola, Ana María')).toBeVisible();
     await responderEncuesta(page);
     await page.getByRole('button', { name: 'Enviar evaluación y registrar salida' }).click();
-    await expect(page.getByText('¡Gracias!')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Salida registrada' })).toBeVisible();
   }
 });
 

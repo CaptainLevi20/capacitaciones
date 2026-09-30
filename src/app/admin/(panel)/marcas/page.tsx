@@ -24,7 +24,7 @@ function CamposMarca({ marca }: { marca?: Marca }) {
           <input type="file" name="logo" accept="image/png,image/svg+xml,image/jpeg" className={claseInput} />
         </CampoAdmin>
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-sm text-tinta">
         <input type="checkbox" name="activa" defaultChecked={marca?.activa ?? true} /> Activa
       </label>
     </>
@@ -36,8 +36,8 @@ export default async function PaginaMarcas() {
   const marcas = await listarMarcas(db);
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Marcas</h1>
-      <p className="text-sm text-slate-600">
+      <h1 className="font-serif text-[1.75rem] font-semibold text-tinta">Marcas</h1>
+      <p className="text-sm text-apagado">
         Logos institucionales disponibles para el co-branding de los eventos. PNG, SVG o JPG, máximo 1 MB.
       </p>
       {marcas.map((m) => (
@@ -47,7 +47,7 @@ export default async function PaginaMarcas() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={urlLogo(m.logo_path)} alt={m.nombre} className="h-12 w-auto" />
             ) : (
-              <span className="text-sm text-slate-500">Sin logo</span>
+              <span className="text-sm text-apagado">Sin logo</span>
             )}
           </div>
           <FormularioAccion accion={guardarMarcaAccion.bind(null, m.id)} textoBoton="Guardar">
@@ -56,7 +56,7 @@ export default async function PaginaMarcas() {
         </section>
       ))}
       <section className={claseTarjeta} data-testid="nueva-marca">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">Nueva marca</h2>
+        <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Nueva marca</h2>
         <FormularioAccion accion={guardarMarcaAccion.bind(null, null)} textoBoton="Crear marca">
           <CamposMarca />
         </FormularioAccion>
