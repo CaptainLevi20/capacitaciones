@@ -9,9 +9,11 @@ import {
   listarEventos,
   nuevaVersionHabeas,
   obtenerEvento,
+  obtenerPreparacion,
 } from '@/lib/repo/eventos';
 import { guardarConfiguracion } from '@/lib/repo/configuracion';
 import { ErrorNegocio } from '@/lib/errores';
+import { pasosFaltantes } from '@/lib/domain/preparacion';
 import { clienteServicioPrueba, crearEventoPrueba, limpiarDatos } from './helpers';
 
 const db = clienteServicioPrueba();
@@ -56,12 +58,43 @@ describe('Habeas Data y activación', () => {
     expect(ev.habeas.map((h) => h.version)).toEqual([2, 1]);
   });
 
-  it('no activa con el texto provisional y sí con la cláusula oficial', async () => {
+  it('no activa mientras falten pasos obligatorios y sí cuando están completos', async () => {
     const id = await crearEvento(db, datos);
-    await expect(cambiarEstadoEvento(db, id, 'activo')).rejects.toBeInstanceOf(ErrorNegocio);
+    const intento = cambiarEstadoEvento(db, id, 'activo');
+    await expect(intento).rejects.toBeInstanceOf(ErrorNegocio);
+    await expect(intento).rejects.toThrow(/autorización de datos.*co-branding.*sesiones/);
+
     await nuevaVersionHabeas(db, id, CLAUSULA, null);
+    const { data: marca } = await db.from('marcas').insert({ nombre: 'PGN', logo_path: 'pgn/logo.png' }).select('id').single();
+    await guardarMarcasEvento(db, id, [{ marcaId: marca!.id, orden: 1, visible: true }]);
+    await db.from('sesiones').insert({
+      evento_id: id,
+      numero: 1,
+      inicio: '2099-10-14T13:00:00Z',
+      fin: '2099-10-14T17:00:00Z',
+      token_entrada: 'tok-entrada-activacion-000001',
+      token_salida: 'tok-salida-activacion-0000001',
+    });
+    expect(pasosFaltantes(await obtenerPreparacion(db, id))).toBe(0);
     await cambiarEstadoEvento(db, id, 'activo');
     expect((await obtenerEvento(db, id))!.estado).toBe('activo');
+  });
+
+  it('no cuenta marcas inactivas ni ocultas en el co-branding', async () => {
+    const id = await crearEvento(db, datos);
+    const { data: m } = await db
+      .from('marcas')
+      .insert([
+        { nombre: 'Inactiva', logo_path: 'a/logo.png', activa: false },
+        { nombre: 'Oculta', logo_path: 'b/logo.png', activa: true },
+      ])
+      .select('id, nombre');
+    await guardarMarcasEvento(db, id, [
+      { marcaId: m!.find((x) => x.nombre === 'Inactiva')!.id, orden: 1, visible: true },
+      { marcaId: m!.find((x) => x.nombre === 'Oculta')!.id, orden: 2, visible: false },
+    ]);
+    const item = (await obtenerPreparacion(db, id)).find((i) => i.clave === 'cobranding')!;
+    expect(item.estado).toBe('falta');
   });
 });
 
@@ -112,5 +145,6 @@ describe('listarEventos', () => {
     const fila = (await listarEventos(db)).find((e) => e.id === ev.eventoId)!;
     expect(fila.sesiones).toBe(1);
     expect(fila.proxima).toBeInstanceOf(Date);
+    expect(fila.faltantes).toBe(1); // el evento de prueba no tiene co-branding
   });
 });

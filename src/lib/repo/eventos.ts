@@ -4,6 +4,13 @@ import type { Pregunta } from '@/lib/domain/encuesta';
 import { HABEAS_PENDIENTE, type EstadoEvento } from '@/lib/domain/constantes';
 import { ErrorNegocio } from '@/lib/errores';
 import { proximaSesion } from '@/lib/domain/sesion-estado';
+import {
+  motivoNoActivar,
+  pasosFaltantes,
+  revisarPreparacion,
+  type EntradaPreparacion,
+  type ItemPreparacion,
+} from '@/lib/domain/preparacion';
 import { obtenerConfiguracion } from './configuracion';
 
 export interface MarcaEvento {
@@ -35,22 +42,54 @@ export interface EventoResumen {
   estado: EstadoEvento;
   sesiones: number;
   proxima: Date | null;
+  // Pasos obligatorios de la lista de preparación que faltan.
+  faltantes: number;
 }
 
-export function puedeActivarse(textoHabeas: string): string | null {
-  return textoHabeas.includes(HABEAS_PENDIENTE)
-    ? 'No se puede activar: el texto de Habeas Data sigue siendo el provisional. Reemplácelo por la cláusula oficial.'
-    : null;
+// Lo que necesita la lista de preparación, en una sola consulta con relaciones anidadas.
+const SELECT_PREPARACION =
+  'cliente, capacitadores, dominio_correo, sesiones(inicio, fin), evento_preguntas(activa), ' +
+  'evento_habeas_versiones(texto, version), evento_marcas(visible, marca:marcas(nombre, activa, logo_path))';
+
+interface FilaPreparacion {
+  cliente: string | null;
+  capacitadores: string | null;
+  dominio_correo: string | null;
+  sesiones: { inicio: string; fin: string }[];
+  evento_preguntas: { activa: boolean }[];
+  evento_habeas_versiones: { texto: string; version: number }[];
+  evento_marcas: { visible: boolean; marca: { nombre: string; activa: boolean; logo_path: string | null } | null }[];
+}
+
+function aEntradaPreparacion(f: FilaPreparacion): EntradaPreparacion {
+  const vigente = [...f.evento_habeas_versiones].sort((a, b) => b.version - a.version)[0];
+  return {
+    textoHabeas: vigente?.texto ?? HABEAS_PENDIENTE,
+    marcasVisibles: f.evento_marcas
+      .filter((m) => m.visible && m.marca?.activa)
+      .map((m) => ({ nombre: m.marca!.nombre, tieneLogo: !!m.marca!.logo_path })),
+    sesiones: f.sesiones.length,
+    preguntasActivas: f.evento_preguntas.filter((p) => p.activa).length,
+    cliente: f.cliente,
+    capacitadores: f.capacitadores,
+    dominioCorreo: f.dominio_correo,
+  };
+}
+
+export async function obtenerPreparacion(db: Db, eventoId: string): Promise<ItemPreparacion[]> {
+  const { data, error } = await db.from('eventos').select(SELECT_PREPARACION).eq('id', eventoId).single();
+  if (error) throw error;
+  return revisarPreparacion(aEntradaPreparacion(data as unknown as FilaPreparacion));
 }
 
 export async function listarEventos(db: Db): Promise<EventoResumen[]> {
   const { data, error } = await db
     .from('eventos')
-    .select('id, nombre, cliente, estado, sesiones(inicio, fin)')
+    .select(`id, nombre, estado, ${SELECT_PREPARACION}`)
     .order('created_at', { ascending: false });
   if (error) throw error;
   const ahora = new Date();
-  type Fila = Omit<EventoResumen, 'sesiones' | 'proxima'> & { sesiones: { inicio: string; fin: string }[] };
+  type Fila = FilaPreparacion & Pick<EventoResumen, 'id' | 'nombre' | 'estado'>;
   return (data as unknown as Fila[]).map((e) => {
     const sesiones = e.sesiones.map((s) => ({ inicio: new Date(s.inicio), fin: new Date(s.fin) }));
     return {
@@ -60,6 +99,7 @@ export async function listarEventos(db: Db): Promise<EventoResumen[]> {
       estado: e.estado,
       sesiones: sesiones.length,
       proxima: proximaSesion(sesiones, ahora)?.inicio ?? null,
+      faltantes: pasosFaltantes(revisarPreparacion(aEntradaPreparacion(e))),
     };
   });
 }
@@ -167,15 +207,7 @@ export async function guardarPreguntas(
 
 export async function cambiarEstadoEvento(db: Db, eventoId: string, estado: EstadoEvento): Promise<void> {
   if (estado === 'activo') {
-    const { data, error } = await db
-      .from('evento_habeas_versiones')
-      .select('texto')
-      .eq('evento_id', eventoId)
-      .order('version', { ascending: false })
-      .limit(1)
-      .single();
-    if (error) throw error;
-    const motivo = puedeActivarse(data.texto);
+    const motivo = motivoNoActivar(await obtenerPreparacion(db, eventoId));
     if (motivo) throw new ErrorNegocio(motivo);
   }
   const { error } = await db.from('eventos').update({ estado }).eq('id', eventoId);

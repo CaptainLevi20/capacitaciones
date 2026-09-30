@@ -46,9 +46,16 @@ export function EditorCoBranding({
     .filter((i) => i.visible)
     .map((i) => ({ nombre: opcion(i.marcaId).nombre, logoUrl: opcion(i.marcaId).logoUrl }));
   const json = JSON.stringify(items.map((it, i) => ({ marcaId: it.marcaId, orden: i + 1, visible: it.visible })));
+  // Lo último guardado: si el estado actual difiere, hay cambios pendientes (marcar o reordenar).
+  const [guardado, setGuardado] = useState(json);
 
   return (
-    <FormularioAccion accion={accion} textoBoton="Guardar co-branding">
+    <FormularioAccion
+      accion={accion}
+      textoBoton="Guardar co-branding"
+      sucio={json !== guardado}
+      alGuardar={() => setGuardado(json)}
+    >
       <input type="hidden" name="marcas_json" value={json} />
       <ul className="divide-y divide-linea">
         {items.map((it, idx) => (
@@ -56,6 +63,7 @@ export function EditorCoBranding({
             <label className="flex flex-1 items-center gap-2">
               <input type="checkbox" checked={it.visible} onChange={() => alternar(idx)} />
               {opcion(it.marcaId).nombre}
+              {!opcion(it.marcaId).logoUrl && <span className="text-xs text-aviso">(sin logo)</span>}
             </label>
             <button
               type="button"
@@ -77,7 +85,7 @@ export function EditorCoBranding({
         ))}
       </ul>
       <div className="rounded-lg border border-linea bg-white p-4">
-        <p className="mb-2 text-xs uppercase tracking-wide text-apagado">Vista previa del encabezado</p>
+        <p className="mb-2 text-sm text-apagado">Vista previa del encabezado</p>
         {vista.length ? <EncabezadoMarcas marcas={vista} /> : <p className="text-sm text-apagado">Sin logos visibles</p>}
       </div>
     </FormularioAccion>

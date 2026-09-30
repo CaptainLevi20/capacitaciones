@@ -50,12 +50,22 @@ export default async function PaginaEventos() {
                         <span className="text-apagado">{formatearHora(e.proxima)}</span>
                       </>
                     ) : (
-                      <span className="text-apagado">Sin sesiones pendientes</span>
+                      <span className="text-apagado">{e.sesiones ? 'Sin sesiones pendientes' : 'Sin sesiones'}</span>
                     )}
                   </td>
                   <td className="px-3 py-3.5 text-right tabular-nums">{e.sesiones}</td>
                   <td className="px-5 py-3.5">
-                    <InsigniaEvento estado={e.estado} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <InsigniaEvento estado={e.estado} />
+                      {e.estado !== 'archivado' && e.faltantes > 0 && (
+                        <Link
+                          href={`/admin/eventos/${e.id}`}
+                          className="text-[0.8125rem] font-medium whitespace-nowrap text-peligro hover:underline"
+                        >
+                          {e.faltantes === 1 ? 'Falta 1 paso' : `Faltan ${e.faltantes} pasos`}
+                        </Link>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

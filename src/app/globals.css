@@ -48,3 +48,17 @@ body {
     opacity: 1;
   }
 }
+
+/* FormularioAccion marca su sección cuando tiene cambios sin guardar. */
+section[data-sucio] > h2::after {
+  content: "Cambios sin guardar";
+  margin-left: 0.75rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  background: var(--color-aviso-suave);
+  color: var(--color-aviso);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  vertical-align: middle;
+}

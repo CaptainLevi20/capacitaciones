@@ -34,7 +34,6 @@ describe('marcaSchema', () => {
 });
 
 import { eventoSchema, habeasSchema } from '@/lib/domain/schemas-admin';
-import { puedeActivarse } from '@/lib/repo/eventos';
 
 describe('eventoSchema', () => {
   it('normaliza dominio y convierte vacíos en null', () => {
@@ -71,13 +70,6 @@ describe('habeasSchema', () => {
     expect(() => validar(habeasSchema, { texto: 'x'.repeat(301), url_politica: '' })).toThrow(
       'El texto de la casilla debe ser breve (máximo 300 caracteres)',
     );
-  });
-});
-
-describe('puedeActivarse', () => {
-  it('bloquea mientras el texto sea el provisional', () => {
-    expect(puedeActivarse('[PENDIENTE: cláusula oficial de Avance Jurídico]')).toMatch(/provisional/);
-    expect(puedeActivarse('Autorizo a Avance Jurídico...')).toBeNull();
   });
 });
 
