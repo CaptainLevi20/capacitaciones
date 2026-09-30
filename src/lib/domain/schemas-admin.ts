@@ -92,3 +92,16 @@ export type DatosSesion = z.infer<typeof sesionSchema>;
 export const CAMPOS_SESION = [
   'numero', 'titulo', 'lugar', 'inicio', 'fin', 'modo_apertura', 'abre_min_antes', 'cierra_min_despues',
 ];
+
+export const filasSesionSchema = z
+  .array(
+    z.object({
+      numero: z.string(),
+      fecha: z.string(),
+      horaInicio: z.string(),
+      horaFin: z.string(),
+      titulo: z.string(),
+      lugar: z.string(),
+    }),
+  )
+  .min(1, 'Agregue al menos una sesión');

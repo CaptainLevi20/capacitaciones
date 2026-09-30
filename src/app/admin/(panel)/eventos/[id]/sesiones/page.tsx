@@ -14,8 +14,10 @@ import {
   automaticoSesionAccion,
   cerrarSesionAccion,
   crearSesionesAccion,
+  crearSesionesFormularioAccion,
   regenerarTokensAccion,
 } from './actions';
+import { EditorSesiones } from './EditorSesiones';
 
 export default async function PaginaSesiones({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -39,7 +41,7 @@ export default async function PaginaSesiones({ params }: { params: Promise<{ id:
           <p className="text-slate-600">Aún no hay sesiones.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm" data-testid="tabla-sesiones">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600">
                   <th className="py-2 pr-3">Nº</th>
@@ -119,19 +121,30 @@ export default async function PaginaSesiones({ params }: { params: Promise<{ id:
       <section className={claseTarjeta}>
         <h2 className="mb-1 text-lg font-semibold text-slate-900">Crear sesiones</h2>
         <p className="mb-3 text-sm text-slate-600">
-          Una sesión por línea: número; fecha; hora de inicio; hora de fin; título (opcional); lugar (opcional). Puede
-          pegar filas copiadas de Excel. Las horas son de Bogotá.
+          Una fila por sesión. Las horas son de Bogotá. “+ Agregar sesión” propone la siguiente una semana después,
+          con el mismo horario y lugar.
         </p>
-        <FormularioAccion accion={crearSesionesAccion.bind(null, id)} textoBoton="Crear sesiones">
-          <CampoAdmin etiqueta="Filas de sesiones">
-            <textarea
-              name="filas"
-              rows={6}
-              placeholder={'1; 2026-10-14; 08:00; 12:00; Régimen disciplinario; Auditorio principal\n2; 21/10/2026; 08:00; 12:00'}
-              className={`${claseInput} font-mono`}
-            />
-          </CampoAdmin>
-        </FormularioAccion>
+        <EditorSesiones
+          accion={crearSesionesFormularioAccion.bind(null, id)}
+          siguienteNumero={Math.max(0, ...sesiones.map((s) => s.numero)) + 1}
+        />
+        <details className="mt-6 border-t border-slate-200 pt-4">
+          <summary className="cursor-pointer text-sm font-medium text-slate-700">Pegar desde Excel</summary>
+          <p className="my-3 text-sm text-slate-600">
+            Una sesión por línea: número; fecha; hora de inicio; hora de fin; título (opcional); lugar (opcional).
+            Puede pegar filas copiadas de Excel.
+          </p>
+          <FormularioAccion accion={crearSesionesAccion.bind(null, id)} textoBoton="Crear desde texto">
+            <CampoAdmin etiqueta="Filas de sesiones">
+              <textarea
+                name="filas"
+                rows={6}
+                placeholder={'1; 2026-10-14; 08:00; 12:00; Régimen disciplinario; Auditorio principal\n2; 21/10/2026; 08:00; 12:00'}
+                className={`${claseInput} font-mono`}
+              />
+            </CampoAdmin>
+          </FormularioAccion>
+        </details>
       </section>
     </div>
   );

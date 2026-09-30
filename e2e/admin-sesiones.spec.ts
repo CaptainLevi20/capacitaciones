@@ -6,17 +6,27 @@ test.beforeEach(async () => {
   await limpiarDatos();
 });
 
-test('crea sesiones pegando filas y las abre y cierra', async ({ page }) => {
-  const ev = await crearEventoPrueba(clienteServicioPrueba());
+test('crea sesiones con los selectores y las abre y cierra', async ({ page }) => {
+  const ev = await crearEventoPrueba(clienteServicioPrueba()); // ya trae la sesión 1
   await iniciarSesionAdmin(page);
   await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
-  await page
-    .getByLabel('Filas de sesiones')
-    .fill('2;2099-10-21;08:00;12:00;Régimen disciplinario;Auditorio\n3\t28/10/2099\t08:00\t12:00\tSesión tres');
+  await expect(page.getByLabel('Número de la sesión (fila 1)')).toHaveValue('2');
+  await page.getByLabel('Fecha (fila 1)').fill('2099-10-21');
+  await page.getByLabel('Hora de inicio (fila 1)').fill('08:00');
+  await page.getByLabel('Hora de fin (fila 1)').fill('12:00');
+  await page.getByLabel('Título (fila 1)').fill('Régimen disciplinario');
+  await page.getByLabel('Lugar (fila 1)').fill('Auditorio');
+  await page.getByRole('button', { name: '+ Agregar sesión' }).click();
+  await expect(page.getByLabel('Número de la sesión (fila 2)')).toHaveValue('3');
+  await expect(page.getByLabel('Fecha (fila 2)')).toHaveValue('2099-10-28');
+  await expect(page.getByLabel('Lugar (fila 2)')).toHaveValue('Auditorio');
+  await page.getByLabel('Título (fila 2)').fill('Sesión tres');
   await page.getByRole('button', { name: 'Crear sesiones' }).click();
   await expect(page.getByText('2 sesiones creadas')).toBeVisible();
 
-  const fila = page.getByRole('row', { name: /Régimen disciplinario/ });
+  const tabla = page.getByTestId('tabla-sesiones');
+  await expect(tabla.getByRole('row')).toHaveCount(4); // encabezado + 3 sesiones
+  const fila = tabla.getByRole('row', { name: /Régimen disciplinario/ });
   await expect(fila).toContainText('Programada');
   await fila.getByRole('button', { name: 'Abrir', exact: true }).click();
   await expect(fila).toContainText('Abierta (manual)');
@@ -26,21 +36,37 @@ test('crea sesiones pegando filas y las abre y cierra', async ({ page }) => {
   await expect(fila).toContainText('Programada');
 });
 
-test('rechaza filas con errores sin crear nada', async ({ page }) => {
+test('marca la fila con error y no crea ninguna sesión', async ({ page }) => {
   const ev = await crearEventoPrueba(clienteServicioPrueba());
   await iniciarSesionAdmin(page);
   await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
-  await page.getByLabel('Filas de sesiones').fill('5;2026-02-31;08:00;12:00');
+  await page.getByLabel('Fecha (fila 1)').fill('2099-10-21');
+  await page.getByRole('button', { name: '+ Agregar sesión' }).click();
+  await page.getByLabel('Hora de fin (fila 2)').fill('07:00');
   await page.getByRole('button', { name: 'Crear sesiones' }).click();
+  await expect(page.getByText('Fila 2: la hora de fin debe ser posterior a la de inicio')).toBeVisible();
+  await expect(page.getByTestId('tabla-sesiones').getByRole('row')).toHaveCount(2); // encabezado + sesión 1
+});
+
+test('pegar desde Excel sigue funcionando y reporta errores por línea', async ({ page }) => {
+  const ev = await crearEventoPrueba(clienteServicioPrueba());
+  await iniciarSesionAdmin(page);
+  await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
+  await page.getByText('Pegar desde Excel').click();
+  await page.getByLabel('Filas de sesiones').fill('5;2026-02-31;08:00;12:00');
+  await page.getByRole('button', { name: 'Crear desde texto' }).click();
   await expect(page.getByText('Línea 1: fecha u hora no válida')).toBeVisible();
-  await expect(page.getByRole('row')).toHaveCount(2); // encabezado + sesión 1
+  await page.getByLabel('Filas de sesiones').fill('5	04/11/2099	08:00	12:00	Sesión cinco');
+  await page.getByRole('button', { name: 'Crear desde texto' }).click();
+  await expect(page.getByText('1 sesión creada')).toBeVisible();
+  await expect(page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión cinco/ })).toBeVisible();
 });
 
 test('edita una sesión', async ({ page }) => {
   const ev = await crearEventoPrueba(clienteServicioPrueba());
   await iniciarSesionAdmin(page);
   await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
-  await page.getByRole('row', { name: /Sesión de prueba/ }).getByRole('link', { name: 'Editar' }).click();
+  await page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión de prueba/ }).getByRole('link', { name: 'Editar' }).click();
   await page.getByLabel('Título').fill('Sesión inaugural');
   await page.getByRole('button', { name: 'Guardar sesión' }).click();
   await expect(page.getByText('Sesión guardada')).toBeVisible();
@@ -50,7 +76,7 @@ test('descarga el QR y muestra la hoja imprimible', async ({ page }) => {
   const ev = await crearEventoPrueba(clienteServicioPrueba());
   await iniciarSesionAdmin(page);
   await page.goto(`/admin/eventos/${ev.eventoId}/sesiones`);
-  const fila = page.getByRole('row', { name: /Sesión de prueba/ });
+  const fila = page.getByTestId('tabla-sesiones').getByRole('row', { name: /Sesión de prueba/ });
   const descarga = page.waitForEvent('download');
   await fila.getByRole('link', { name: 'QR entrada' }).click();
   expect((await descarga).suggestedFilename()).toBe('sesion-1-entrada.png');
