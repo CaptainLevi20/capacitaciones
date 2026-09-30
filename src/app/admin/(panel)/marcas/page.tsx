@@ -10,19 +10,20 @@ import { guardarMarcaAccion } from './actions';
 function CamposMarca({ marca }: { marca?: Marca }) {
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <CampoAdmin etiqueta="Nombre">
           <input name="nombre" defaultValue={marca?.nombre ?? ''} required className={claseInput} />
         </CampoAdmin>
-        <SelectorColor
-          nombre="color_primario"
-          etiqueta="Color principal"
-          valorInicial={marca?.color_primario ?? null}
-          textoVacio="Sin color: esta marca no define el color de los formularios."
-        />
         <CampoAdmin etiqueta="Logo">
           <input type="file" name="logo" accept="image/png,image/svg+xml,image/jpeg" className={claseInput} />
         </CampoAdmin>
+        <SelectorColor
+          nombre="color_primario"
+          etiqueta="Color de la marca"
+          explicacion="Se usa en los formularios de los eventos que no tienen color propio, cuando esta marca es la primera del co-branding con color."
+          valorInicial={marca?.color_primario ?? null}
+          textoVacio="Sin color: esta marca no cambia el color de ningún formulario."
+        />
       </div>
       <label className="flex items-center gap-2 text-sm text-tinta">
         <input type="checkbox" name="activa" defaultChecked={marca?.activa ?? true} /> Activa

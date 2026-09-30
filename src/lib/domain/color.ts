@@ -1,3 +1,5 @@
+import { COLOR_DEFECTO } from './constantes';
+
 export const TINTA = '#1A2433';
 const BLANCO = '#FFFFFF';
 const HEX = /^#([0-9A-Fa-f]{6})$/;
@@ -20,4 +22,25 @@ export function colorTextoSobre(fondo: string): string {
   if (!HEX.test(fondo)) return BLANCO;
   const l = luminancia(fondo);
   return contraste(l, 1) >= contraste(l, luminancia(TINTA)) ? BLANCO : TINTA;
+}
+
+// Por debajo de 3:1 contra el blanco, los textos y bordes que usan el color del evento se leen mal.
+export function colorMuyClaro(color: string): boolean {
+  return HEX.test(color) && contraste(luminancia(color), 1) < 3;
+}
+
+export type OrigenColor =
+  | { color: string; origen: 'evento' }
+  | { color: string; origen: 'marca'; marca: string }
+  | { color: string; origen: 'defecto' };
+
+// El color con que se pintan los formularios públicos (misma regla que obtenerSesionPorToken).
+export function colorFormulario(
+  colorEvento: string | null,
+  marcasVisibles: { nombre: string; color: string | null }[],
+): OrigenColor {
+  if (colorEvento) return { color: colorEvento, origen: 'evento' };
+  const marca = marcasVisibles.find((m) => m.color);
+  if (marca) return { color: marca.color!, origen: 'marca', marca: marca.nombre };
+  return { color: COLOR_DEFECTO, origen: 'defecto' };
 }

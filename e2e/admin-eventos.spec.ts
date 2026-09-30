@@ -121,8 +121,14 @@ test('elige el color del evento con el selector', async ({ page }) => {
   await iniciarSesionAdmin(page);
   await page.getByRole('link', { name: 'Nuevo evento' }).click();
   await page.getByLabel('Nombre del evento').fill('Evento con color');
-  await page.getByLabel('Color principal: selector').fill('#8b0000');
-  await expect(page.getByLabel('Color principal: código')).toHaveValue('#8B0000');
+  await expect(page.getByText('Sin color propio: se usará el azul por defecto (#1F3A5F)')).toBeVisible();
+  await page.getByRole('button', { name: 'Usar color de Avance Jurídico (#1F3A5F)' }).click();
+  await expect(page.getByLabel('Color de los formularios: código')).toHaveValue('#1F3A5F');
+  await page.getByLabel('Color de los formularios: código').fill('#FFD400');
+  await expect(page.getByText('Este color es muy claro')).toBeVisible();
+  await page.getByLabel('Color de los formularios: selector').fill('#8b0000');
+  await expect(page.getByText('Este color es muy claro')).toHaveCount(0);
+  await expect(page.getByLabel('Color de los formularios: código')).toHaveValue('#8B0000');
   await page.getByRole('button', { name: 'Crear evento' }).click();
   await expect(page.getByRole('heading', { name: 'Evento con color' })).toBeVisible();
   const { data } = await clienteServicioPrueba().from('eventos').select('color_primario').eq('nombre', 'Evento con color').single();

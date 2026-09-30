@@ -9,7 +9,8 @@ import { ETIQUETA_TIPO_PREGUNTA } from '@/lib/domain/encuesta';
 import { formatearFechaHora } from '@/lib/domain/fechas';
 import { FormularioAccion } from '@/components/admin/FormularioAccion';
 import { CampoAdmin } from '@/components/admin/CampoAdmin';
-import { CamposEvento } from '@/components/admin/CamposEvento';
+import { CamposEvento, marcasVisiblesConColor, sugerenciasDeColor } from '@/components/admin/CamposEvento';
+import { colorFormulario } from '@/lib/domain/color';
 import { EncabezadoEvento } from '@/components/admin/EncabezadoEvento';
 import { ListaPreparacion } from '@/components/admin/ListaPreparacion';
 import { claseInput, claseTarjeta } from '@/components/admin/estilos';
@@ -90,7 +91,11 @@ export default async function PaginaEvento({ params }: { params: Promise<{ id: s
       <section id="datos-generales" className={`${claseTarjeta} scroll-mt-6`} data-testid="seccion-datos">
         <h2 className="mb-3 font-serif text-xl font-semibold text-tinta">Datos generales</h2>
         <FormularioAccion accion={guardarDatosAccion.bind(null, id)} textoBoton="Guardar datos">
-          <CamposEvento evento={evento} />
+          <CamposEvento
+            evento={evento}
+            respaldo={colorFormulario(null, marcasVisiblesConColor(evento.marcas, marcas))}
+            sugerencias={sugerenciasDeColor(marcas)}
+          />
         </FormularioAccion>
       </section>
 
