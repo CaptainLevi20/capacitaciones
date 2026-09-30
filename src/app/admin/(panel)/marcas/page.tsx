@@ -3,6 +3,7 @@ import { listarMarcas, type Marca } from '@/lib/repo/marcas';
 import { urlLogo } from '@/lib/storage';
 import { FormularioAccion } from '@/components/admin/FormularioAccion';
 import { CampoAdmin } from '@/components/admin/CampoAdmin';
+import { SelectorColor } from '@/components/admin/SelectorColor';
 import { claseInput, claseTarjeta } from '@/components/admin/estilos';
 import { guardarMarcaAccion } from './actions';
 
@@ -13,14 +14,12 @@ function CamposMarca({ marca }: { marca?: Marca }) {
         <CampoAdmin etiqueta="Nombre">
           <input name="nombre" defaultValue={marca?.nombre ?? ''} required className={claseInput} />
         </CampoAdmin>
-        <CampoAdmin etiqueta="Color principal (#RRGGBB)">
-          <input
-            name="color_primario"
-            defaultValue={marca?.color_primario ?? ''}
-            placeholder="#1F3A5F"
-            className={claseInput}
-          />
-        </CampoAdmin>
+        <SelectorColor
+          nombre="color_primario"
+          etiqueta="Color principal"
+          valorInicial={marca?.color_primario ?? null}
+          textoVacio="Sin color: esta marca no define el color de los formularios."
+        />
         <CampoAdmin etiqueta="Logo">
           <input type="file" name="logo" accept="image/png,image/svg+xml,image/jpeg" className={claseInput} />
         </CampoAdmin>

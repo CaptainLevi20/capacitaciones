@@ -1,5 +1,6 @@
 import type { DatosEvento } from '@/lib/domain/schemas-admin';
 import { CampoAdmin } from './CampoAdmin';
+import { SelectorColor } from './SelectorColor';
 import { claseInput } from './estilos';
 
 export function CamposEvento({ evento }: { evento?: DatosEvento }) {
@@ -22,14 +23,12 @@ export function CamposEvento({ evento }: { evento?: DatosEvento }) {
           className={claseInput}
         />
       </CampoAdmin>
-      <CampoAdmin etiqueta="Color principal (opcional, #RRGGBB)">
-        <input
-          name="color_primario"
-          defaultValue={evento?.color_primario ?? ''}
-          placeholder="Si se deja vacío, se usa el de la primera marca"
-          className={claseInput}
-        />
-      </CampoAdmin>
+      <SelectorColor
+        nombre="color_primario"
+        etiqueta="Color principal"
+        valorInicial={evento?.color_primario ?? null}
+        textoVacio="Sin color: se usa el de la primera marca visible del co-branding."
+      />
     </div>
   );
 }

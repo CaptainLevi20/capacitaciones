@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { PNG_1x1, limpiarDatos } from '../tests/integration/helpers';
+import { PNG_1x1, clienteServicioPrueba, limpiarDatos } from '../tests/integration/helpers';
 import { iniciarSesionAdmin } from './utilidades';
 
 test.beforeEach(async () => {
@@ -11,11 +11,31 @@ test('crea una marca con logo', async ({ page }) => {
   await page.getByRole('link', { name: 'Marcas' }).click();
   const nueva = page.getByTestId('nueva-marca');
   await nueva.getByLabel('Nombre').fill('Procuraduría General de la Nación');
-  await nueva.getByLabel('Color principal').fill('#003366');
+  await nueva.getByLabel('Color principal: selector').fill('#003366');
+  await expect(nueva.getByLabel('Color principal: código')).toHaveValue('#003366');
   await nueva.getByLabel('Logo').setInputFiles({ name: 'pgn.png', mimeType: 'image/png', buffer: PNG_1x1 });
   await nueva.getByRole('button', { name: 'Crear marca' }).click();
   await expect(nueva.getByText('Marca creada')).toBeVisible();
   await expect(page.getByRole('img', { name: 'Procuraduría General de la Nación' })).toBeVisible();
+  const { data } = await clienteServicioPrueba()
+    .from('marcas')
+    .select('color_primario')
+    .eq('nombre', 'Procuraduría General de la Nación')
+    .single();
+  expect(data!.color_primario).toBe('#003366');
+});
+
+test('quita el color de una marca con "Sin color"', async ({ page }) => {
+  await iniciarSesionAdmin(page);
+  await page.goto('/admin/marcas');
+  const avance = page.locator('section').filter({ has: page.locator('input[name=nombre][value="Avance Jurídico"]') });
+  await expect(avance.getByLabel('Color principal: código')).toHaveValue('#1F3A5F');
+  await avance.getByRole('button', { name: 'Sin color' }).click();
+  await expect(avance.getByLabel('Color principal: código')).toHaveValue('');
+  await avance.getByRole('button', { name: 'Guardar' }).click();
+  await expect(avance.getByText('Marca actualizada')).toBeVisible();
+  const { data } = await clienteServicioPrueba().from('marcas').select('color_primario').eq('nombre', 'Avance Jurídico').single();
+  expect(data!.color_primario).toBeNull();
 });
 
 test('rechaza un logo que no es imagen', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { limpiarDatos } from '../tests/integration/helpers';
+import { clienteServicioPrueba, limpiarDatos } from '../tests/integration/helpers';
 import { iniciarSesionAdmin } from './utilidades';
 
 test.beforeEach(async () => {
@@ -52,4 +52,16 @@ test('edita las preguntas de la encuesta', async ({ page }) => {
   await expect(enc.getByText('Encuesta guardada')).toBeVisible();
   await page.reload();
   await expect(page.getByTestId('seccion-encuesta').getByLabel('Activar pregunta logistica')).not.toBeChecked();
+});
+
+test('elige el color del evento con el selector', async ({ page }) => {
+  await iniciarSesionAdmin(page);
+  await page.getByRole('link', { name: 'Nuevo evento' }).click();
+  await page.getByLabel('Nombre del evento').fill('Evento con color');
+  await page.getByLabel('Color principal: selector').fill('#8b0000');
+  await expect(page.getByLabel('Color principal: código')).toHaveValue('#8B0000');
+  await page.getByRole('button', { name: 'Crear evento' }).click();
+  await expect(page.getByRole('heading', { name: 'Evento con color' })).toBeVisible();
+  const { data } = await clienteServicioPrueba().from('eventos').select('color_primario').eq('nombre', 'Evento con color').single();
+  expect(data!.color_primario).toBe('#8B0000');
 });
